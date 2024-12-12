@@ -3,7 +3,6 @@ import './App.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './pages/Home';
 import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import UserRegisterPage from './pages/UserRegisterPage';
@@ -24,7 +23,6 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
           <Route path="/register/user" element={<UserRegisterPage />} />
           <Route path="/register/business" element={<BusinessRegisterPage />} />
           <Route path="/user/dashboard" element={<UserDashboard />} />

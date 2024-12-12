@@ -19,34 +19,58 @@ function BusinessRegisterPage() {
   return (
     <div className="flex h-screen">
       {/* 左側企業會員介紹區域 */}
-      <div className="w-1/2 flex items-center justify-center bg-gray-100 p-8">
+      <div className="w-full md:w-1/2 flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-500 p-8">
         {isIntroPhase ? (
-          <div className="text-center space-y-6 max-w-md">
-            <h1 className="text-3xl font-bold text-gray-800">成為企業會員的優勢</h1>
+          <div className="text-center space-y-6 max-w-md bg-white p-8 rounded-lg shadow-lg">
+            <h1 className="text-3xl font-extrabold text-gray-800">成為企業會員的優勢</h1>
             <div className="space-y-4 text-gray-600">
-              <div>
-                <h3 className="text-xl font-semibold mb-2">增加曝光度</h3>
-                <p>透過平台推薦，提升您的餐廳知名度和客源</p>
+              {/* 優勢 1 - 增加曝光度 */}
+              <div className="flex items-center justify-start space-x-4">
+                <img 
+                  src="/re4.svg" 
+                  alt="增加曝光度"
+                  className="w-12 h-12"
+                />
+                <div>
+                  <h3 className="text-xl font-semibold text-center mb-2">增加曝光度</h3>
+                  <p>提升您的餐廳知名度和客源補字補字補字補</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-2">數據分析</h3>
-                <p>獲得詳細的顧客訂單和喜好分析，優化經營策略</p>
+              {/* 優勢 2 - 數據分析 */}
+              <div className="flex items-center justify-start space-x-4">
+                <img 
+                  src="/re5.svg" 
+                  alt="數據分析"
+                  className="w-12 h-12"
+                />
+                <div>
+                  <h3 className="text-xl font-semibold text-center mb-2">數據強分析</h3>
+                  <p>顧客訂單和喜好分析優經營補字補字補字補</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-2">客戶管理</h3>
-                <p>簡化訂單流程，提升顧客體驗和忠誠度</p>
+              {/* 優勢 3 - 客戶管理 */}
+              <div className="flex items-center justify-start space-x-4">
+                <img 
+                  src="/re6.svg" 
+                  alt="客戶管理"
+                  className="w-12 h-12"
+                />
+                <div>
+                  <h3 className="text-xl font-semibold text-center mb-2">客戶加管理</h3>
+                  <p>簡化訂單流程提升顧客體驗和忠誠度補字補</p>
+                </div>
               </div>
             </div>
             <Button 
               onClick={() => setIsIntroPhase(false)}
-              className="w-full mt-6 bg-blue-400"
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:scale-105 transform transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               立即開始註冊
             </Button>
           </div>
         ) : (
-          <div className="w-full max-w-md space-y-6">
-            <h2 className="text-2xl font-bold text-center">企業用戶註冊</h2>
+          <div className="w-full max-w-md space-y-6 bg-white p-8 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-extrabold text-center text-gray-800">企業用戶註冊</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label>餐廳名稱</Label>
@@ -92,7 +116,10 @@ function BusinessRegisterPage() {
                   className="mt-2"
                 />
               </div>
-              <Button type="submit" className="w-full">
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:scale-105 transform transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
                 提交註冊
               </Button>
               <div className="text-center text-sm text-gray-600">
@@ -110,7 +137,7 @@ function BusinessRegisterPage() {
 
       {/* 右側背景圖 */}
       <div 
-        className="w-1/2 bg-cover bg-center" 
+        className="hidden md:block w-1/2 bg-cover bg-center rounded-l-lg" 
         style={{
           backgroundImage: 'url("/re3.jpg")'
         }}
@@ -121,3 +148,4 @@ function BusinessRegisterPage() {
 }
 
 export default BusinessRegisterPage
+

@@ -142,7 +142,7 @@ function Home() {
           />
         </div>
         <div className="col-span-1 space-y-6">
-          <h2 className="text-3xl font-bold">一般會員專屬優惠</h2>
+          <h2 className="text-3xl font-bold text-center">一般會員專屬優惠</h2>
           <p className="text-gray-600 leading-relaxed text-center">
             成為一般會員，享受專屬優惠和便利服務。快速訂位、即時餐廳資訊、個人化推薦，讓您的用餐體驗更加輕鬆愉快
           </p>
@@ -160,7 +160,7 @@ function Home() {
       {/* Hero 2: 企業會員介紹 */}
       <section className="mx-0 grid grid-cols-2 gap-10 items-center my-0 bg-black">
         <div className="col-span-1 space-y-6">
-          <h2 className="text-3xl font-bold text-white">企業會員專屬服務</h2>
+          <h2 className="text-3xl font-bold text-white text-center">企業會員專屬服務</h2>
           <p className="text-white leading-relaxed text-center">
             為餐廳量身打造的會員服務。提供數據分析、客戶管理、行銷工具，幫助您提升營業額和顧客滿意度
           </p>

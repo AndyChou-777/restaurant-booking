@@ -26,18 +26,18 @@ function UserRegisterPage() {
       <div className="w-full md:w-1/2 flex items-center justify-center bg-gradient-to-r from-pink-500 to-red-500 p-8">
         {isIntroPhase ? (
           <div className="text-center space-y-6 max-w-md bg-white p-8 rounded-lg shadow-lg">
-            <h1 className="text-3xl font-extrabold text-gray-800">成為一般會員的好處</h1>
+            <h1 className="text-3xl font-extrabold text-gray-800">成為一般會員的優勢</h1>
             <div className="space-y-4 text-gray-600">
               {/* 介紹區域 */}
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center justify-start space-x-4">
                 <img 
                   src="/re4.svg" 
                   alt="個人化推薦" 
                   className="w-16 h-16 rounded-full bg-gray-200 p-2"
                 />
-                <div>
-                  <h3 className="text-xl font-semibold">個人化推薦</h3>
-                  <p>根據您的喜好推薦最適合的餐廳和美食</p>
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold text-center">專屬推薦</h3>
+                  <p>提升您的餐廳知名度和客源補字補字補字補</p>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
@@ -46,9 +46,9 @@ function UserRegisterPage() {
                   alt="會員優惠" 
                   className="w-16 h-16 rounded-full bg-gray-200 p-2"
                 />
-                <div>
-                  <h3 className="text-xl font-semibold">會員優惠</h3>
-                  <p>享受平台獨家優惠和折扣</p>
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold text-center">會員優惠</h3>
+                  <p>提升您的餐廳知名度和客源補字補字補字補</p>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
@@ -57,15 +57,16 @@ function UserRegisterPage() {
                   alt="輕鬆訂位" 
                   className="w-16 h-16 rounded-full bg-gray-200 p-2"
                 />
-                <div>
+                <div className="text-center">
                   <h3 className="text-xl font-semibold">輕鬆訂位</h3>
-                  <p>快速方便地預訂您喜歡的餐廳</p>
+                  <p>提升您的餐廳知名度和客源補字補字補字補</p>
                 </div>
               </div>
             </div>
             <Button 
               onClick={() => setIsIntroPhase(false)}
               className="w-full bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:scale-105 transform transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500"
+              style={{ height: 'auto', borderRadius: '8px' }}
             >
               立即開始註冊
             </Button>
@@ -118,10 +119,11 @@ function UserRegisterPage() {
                   className="mt-2"
                 />
               </div>
-              <Button type="submit" className="w-full bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:scale-105 transform transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500">
+              <Button type="submit" className="w-full bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:scale-105 transform transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500"
+                      style={{ height: 'auto', borderRadius: '8px' }}>
                 提交註冊
               </Button>
-              <div className="text-center text-sm text-gray-600">
+              <div className="text-center text-sm text-indigo-500">
                 <Button 
                   variant="link" 
                   onClick={() => setIsIntroPhase(true)}

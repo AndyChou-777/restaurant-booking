@@ -23,7 +23,12 @@ import {
 } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Calendar } from "@/components/ui/calendar"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { AlertCircle } from "lucide-react"
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
 
 function BusinessDashboard() {
   const [activeTab, setActiveTab] = useState("restaurants")
@@ -68,9 +73,24 @@ function BusinessDashboard() {
   })
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [selectedDates, setSelectedDates] = useState([])
+  const [showAlert, setShowAlert] = useState(false)
+  const [alertTitle, setAlertTitle] = useState(null)
+  const [alertDescription, setAlertDescription] = useState(null)
+
+  const showTemporaryAlert = (title, description) => {
+    
+    setAlertTitle(title);
+    setAlertDescription(description);
+    setShowAlert(true);
+
+    setTimeout(() => {
+      setShowAlert(false);
+    }, 3000); 
+  };
 
   const handleDeleteRestaurant = (id) => {
     setRestaurants(prev => prev.filter(restaurant => restaurant.id !== id))
+    showTemporaryAlert('刪除成功', '餐廳資料已成功刪除')
   }
 
   const handleEditRestaurant = (restaurant) => {
@@ -84,6 +104,9 @@ function BusinessDashboard() {
       )
       setSelectedRestaurant(null)
     }
+
+    showTemporaryAlert('修改成功!', '餐廳資料已成功更新');
+
   }
 
   const handleCreateNewRestaurant = () => {
@@ -102,13 +125,14 @@ function BusinessDashboard() {
       hours: { morning: "", evening: "" },
     })
     setSelectedDates([])
+    showTemporaryAlert('建立成功!', '餐廳已成功建立，請前往管理頁面進行確認。')
   }
 
   const renderContent = () => {
     switch(activeTab) {
       case "restaurants":
         return (
-          <Card>
+          <Card className="bg-white text-black shadow-lg hover:shadow-2xl transition-all duration-300">
             <CardHeader>
               <CardTitle>餐廳管理</CardTitle>
               <CardDescription>查看和管理您的餐廳</CardDescription>
@@ -133,6 +157,7 @@ function BusinessDashboard() {
                         variant="outline" 
                         size="sm" 
                         onClick={() => handleEditRestaurant(restaurant)}
+                        className="rounded-[8px]"
                       >
                         <Edit className="mr-2 h-4 w-4" /> 編輯
                       </Button>
@@ -140,6 +165,7 @@ function BusinessDashboard() {
                         variant="destructive" 
                         size="sm" 
                         onClick={() => handleDeleteRestaurant(restaurant.id)}
+                        className="border border-black rounded-[8px]"
                       >
                         <Trash2 className="mr-2 h-4 w-4" /> 刪除
                       </Button>
@@ -153,7 +179,7 @@ function BusinessDashboard() {
 
       case "new-restaurant":
         return (
-          <Card>
+          <Card className="bg-white text-black shadow-lg hover:shadow-2xl transition-all duration-300">
             <CardHeader>
               <CardTitle>新增餐廳</CardTitle>
               <CardDescription>建立您的新餐廳</CardDescription>
@@ -214,7 +240,8 @@ function BusinessDashboard() {
                     className="rounded-md border"
                   />
                 </div>
-                <Button onClick={handleCreateNewRestaurant}>
+                <Button onClick={handleCreateNewRestaurant}
+                        className="border border-black rounded-[8px]">
                   <PlusCircle className="mr-2 h-4 w-4" /> 建立餐廳
                 </Button>
               </div>
@@ -224,7 +251,7 @@ function BusinessDashboard() {
 
       case "account":
         return (
-          <Card>
+          <Card className="bg-white text-black shadow-lg hover:shadow-2xl transition-all duration-300">
             <CardHeader>
               <CardTitle>帳號管理</CardTitle>
               <CardDescription>管理您的企業帳號資訊</CardDescription>
@@ -252,7 +279,11 @@ function BusinessDashboard() {
                     onChange={(e) => setAccountInfo(prev => ({...prev, phone: e.target.value}))}
                   />
                 </div>
-                <Button>儲存變更</Button>
+                <Button className="bg-blue-500 text-white font-bold shadow-md hover:bg-blue-600 rounded-[8px]"
+                        onClick = { () => showTemporaryAlert('資料變更成功!', '餐廳基本資料已變更')}
+                >
+                  儲存變更
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -269,7 +300,7 @@ function BusinessDashboard() {
 
     return (
       <Dialog open={!!selectedRestaurant} onOpenChange={() => setSelectedRestaurant(null)}>
-        <DialogContent>
+        <DialogContent className="bg-white">
           <DialogHeader>
             <DialogTitle>編輯餐廳</DialogTitle>
           </DialogHeader>
@@ -317,7 +348,11 @@ function BusinessDashboard() {
                 />
               </div>
             </div>
-            <Button onClick={handleSaveRestaurant}>儲存變更</Button>
+              <Button onClick={handleSaveRestaurant}
+                      className="bg-blue-500 text-white font-bold shadow-md hover:bg-blue-600 rounded-[8px]"
+              >
+                儲存變更
+              </Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -326,29 +361,42 @@ function BusinessDashboard() {
 
   return (
     <div className="flex h-screen">
+
+      {/* Alert 控制區塊 */}
+
+      {showAlert && (
+      <Alert className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white text-black border border-black p-4 shadow-lg z-50 w-[500px] rounded-[8px]">
+      <AlertCircle className="h-4 w-4" />
+      <AlertTitle className='font-bold'>{alertTitle}</AlertTitle>
+      <AlertDescription>
+        {alertDescription}
+      </AlertDescription>
+      </Alert>
+      )}
+
       {/* 側邊欄 */}
-      <div className="w-64 border-r bg-gray-50 p-4">
-        <div className="space-y-2">
+      <div className="w-64 border-r bg-gray-800 p-4">
+        <div className="space-y-4">
           <button 
-            className={`flex items-center space-x-2 p-2 w-full text-left rounded ${activeTab === "restaurants" ? "bg-gray-200" : "hover:bg-gray-100"}`}
+            className={`flex items-center space-x-3 p-3 w-full text-left rounded-lg ${activeTab === "restaurants" ? "bg-blue-600" : "hover:bg-gray-600"}`}
             onClick={() => setActiveTab("restaurants")}
           >
-            <Home className="h-5 w-5" />
-            <span>餐廳管理</span>
+            <Home className="h-5 w-5 text-gray-300" />
+            <span className="text-gray-300">餐廳管理</span>
           </button>
           <button 
-            className={`flex items-center space-x-2 p-2 w-full text-left rounded ${activeTab === "new-restaurant" ? "bg-gray-200" : "hover:bg-gray-100"}`}
+            className={`flex items-center space-x-3 p-3 w-full text-left rounded-lg ${activeTab === "new-restaurant" ? "bg-blue-600" : "hover:bg-gray-600"}`}
             onClick={() => setActiveTab("new-restaurant")}
           >
-            <PlusCircle className="h-5 w-5" />
-            <span>新增餐廳</span>
+            <PlusCircle className="h-5 w-5 text-gray-300" />
+            <span className="text-gray-300">新增餐廳</span>
           </button>
           <button 
-            className={`flex items-center space-x-2 p-2 w-full text-left rounded ${activeTab === "account" ? "bg-gray-200" : "hover:bg-gray-100"}`}
+            className={`flex items-center space-x-3 p-3 w-full text-left rounded-lg ${activeTab === "account" ? "bg-blue-600" : "hover:bg-gray-600"}`}
             onClick={() => setActiveTab("account")}
           >
-            <User className="h-5 w-5" />
-            <span>帳號管理</span>
+            <User className="h-5 w-5 text-gray-300" />
+            <span className="text-gray-300">帳號管理</span>
           </button>
         </div>
       </div>

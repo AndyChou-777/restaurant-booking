@@ -29,10 +29,10 @@ function BusinessRegisterPage() {
                 <img 
                   src="/re4.svg" 
                   alt="增加曝光度"
-                  className="w-12 h-12"
+                  className="w-16 h-16 rounded-full bg-gray-200 p-2"
                 />
                 <div>
-                  <h3 className="text-xl font-semibold text-center mb-2">增加曝光度</h3>
+                  <h3 className="text-xl font-semibold text-center mb-2">加曝光度</h3>
                   <p>提升您的餐廳知名度和客源補字補字補字補</p>
                 </div>
               </div>
@@ -41,10 +41,10 @@ function BusinessRegisterPage() {
                 <img 
                   src="/re5.svg" 
                   alt="數據分析"
-                  className="w-12 h-12"
+                  className="w-16 h-16 rounded-full bg-gray-200 p-2"
                 />
                 <div>
-                  <h3 className="text-xl font-semibold text-center mb-2">數據強分析</h3>
+                  <h3 className="text-xl font-semibold text-center mb-2">數據分析</h3>
                   <p>顧客訂單和喜好分析優經營補字補字補字補</p>
                 </div>
               </div>
@@ -53,10 +53,10 @@ function BusinessRegisterPage() {
                 <img 
                   src="/re6.svg" 
                   alt="客戶管理"
-                  className="w-12 h-12"
+                  className="w-16 h-16 rounded-full bg-gray-200 p-2"
                 />
                 <div>
-                  <h3 className="text-xl font-semibold text-center mb-2">客戶加管理</h3>
+                  <h3 className="text-xl font-semibold text-center mb-2">客戶管理</h3>
                   <p>簡化訂單流程提升顧客體驗和忠誠度補字補</p>
                 </div>
               </div>
@@ -64,6 +64,7 @@ function BusinessRegisterPage() {
             <Button 
               onClick={() => setIsIntroPhase(false)}
               className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:scale-105 transform transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{ height: 'auto', borderRadius: '8px' }}
             >
               立即開始註冊
             </Button>
@@ -119,10 +120,11 @@ function BusinessRegisterPage() {
               <Button 
                 type="submit" 
                 className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:scale-105 transform transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500"
+                style={{ height: 'auto', borderRadius: '8px' }}
               >
                 提交註冊
               </Button>
-              <div className="text-center text-sm text-gray-600">
+              <div className="text-center text-sm text-pink-500">
                 <Button 
                   variant="link" 
                   onClick={() => setIsIntroPhase(true)}

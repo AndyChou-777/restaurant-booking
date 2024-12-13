@@ -9,12 +9,12 @@ function LoginPage() {
     <div className="flex h-screen">
       {/* 左側背景圖 */}
       <div className="w-1/2 bg-cover bg-center rounded-l-lg" style={{
-        backgroundImage: 'url("/re2.jpg")'
+        backgroundImage: 'url("/re12.webp")'
       }}>
       </div>
 
       {/* 右側登入區域 */}
-      <div className="w-full md:w-1/2 flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-500 p-8 rounded-r-lg">
+      <div className="w-full md:w-1/2 flex items-center justify-center bg-gradient-to-r from-yellow-900 to-gray-900 p-8 rounded-r-lg">
         <Tabs defaultValue="personal" className="w-full max-w-md bg-white p-8 rounded-lg shadow-xl">
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger 
@@ -54,7 +54,9 @@ function LoginPage() {
                     className="mt-2 p-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:scale-105 transform transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <Button className="w-full bg-gradient-to-r from-gray-900 to-yellow-700 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:scale-105 transform transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        style={{ height: 'auto', borderRadius: '8px' }}
+                >
                   登入
                 </Button>
                 <div className="text-center text-sm text-gray-600">
@@ -90,7 +92,9 @@ function LoginPage() {
                     className="mt-2 p-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:scale-105 transform transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <Button className="w-full bg-gradient-to-r from-gray-900 to-yellow-700 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:scale-105 transform transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        style={{ height: 'auto', borderRadius: '8px' }}
+                >
                   登入
                 </Button>
                 <div className="text-center text-sm text-gray-600">

@@ -60,7 +60,7 @@ function UserDashboard() {
     switch(activeTab) {
       case "profile":
         return (
-          <Card>
+          <Card className="bg-white text-black shadow-lg hover:shadow-2xl transition-all duration-300">
             <CardHeader>
               <CardTitle>個人資料管理</CardTitle>
               <CardDescription>查看和編輯您的個人資訊</CardDescription>
@@ -72,6 +72,7 @@ function UserDashboard() {
                   <Input 
                     value={editData.name} 
                     onChange={(e) => setEditData(prev => ({ ...prev, name: e.target.value }))} 
+                    className="bg-gray-100 text-black border-2 rounded-lg focus:ring-2 focus:ring-indigo-500 p-3"
                   />
                 </div>
                 <div>
@@ -79,23 +80,29 @@ function UserDashboard() {
                   <Input 
                     value={editData.email} 
                     onChange={(e) => setEditData(prev => ({ ...prev, email: e.target.value }))} 
+                    className="bg-gray-100 text-black border-2 rounded-lg focus:ring-2 focus:ring-indigo-500 p-3"
                   />
                 </div>
-                <Button onClick={handleSaveProfile}>儲存變更</Button>
+                <Button 
+                  onClick={handleSaveProfile} 
+                  className="w-[100px] bg-blue-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-blue-600"
+                >
+                  儲存變更
+                </Button>
               </div>
             </CardContent>
           </Card>
         )
       case "orders":
         return (
-          <Card>
+          <Card className="bg-white text-black shadow-lg hover:shadow-2xl transition-all duration-300">
             <CardHeader>
               <CardTitle>訂單管理</CardTitle>
               <CardDescription>查看您的歷史訂單</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="border rounded">
-                <div className="grid grid-cols-4 bg-gray-100 p-2 font-bold border-b">
+              <div className="border rounded shadow-sm bg-white">
+                <div className="grid grid-cols-4 bg-gray-200 p-2 font-bold border-b text-gray-700">
                   <div>訂單編號</div>
                   <div>餐廳</div>
                   <div>日期</div>
@@ -104,7 +111,7 @@ function UserDashboard() {
                 {userData.orders.map((order) => (
                   <div 
                     key={order.id} 
-                    className="grid grid-cols-4 p-2 border-b last:border-b-0 hover:bg-gray-50"
+                    className="grid grid-cols-4 p-2 border-b last:border-b-0 hover:bg-gray-100 transition-all duration-200"
                   >
                     <div>{order.id}</div>
                     <div>{order.restaurant}</div>
@@ -118,7 +125,7 @@ function UserDashboard() {
         )
       case "notifications":
         return (
-          <Card>
+          <Card className="bg-white text-black shadow-lg hover:shadow-2xl transition-all duration-300">
             <CardHeader>
               <CardTitle>通知</CardTitle>
               <CardDescription>您的最新消息</CardDescription>
@@ -127,7 +134,7 @@ function UserDashboard() {
               {userData.notifications.map((notification) => (
                 <div 
                   key={notification.id} 
-                  className="p-3 border-b last:border-b-0 hover:bg-gray-50"
+                  className="p-3 border-b last:border-b-0 hover:bg-gray-100 transition-all duration-200"
                 >
                   {notification.message}
                 </div>
@@ -143,43 +150,43 @@ function UserDashboard() {
   if (!userData) return <div>載入中...</div>
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-gray-900">
       {/* 側邊欄 */}
-      <div className="w-64 border-r bg-gray-50 p-4">
-        <div className="space-y-2">
+      <div className="w-64 border-r bg-gray-800 p-4">
+        <div className="space-y-4">
           <button 
-            className={`flex items-center space-x-2 p-2 w-full text-left rounded ${activeTab === "profile" ? "bg-gray-200" : "hover:bg-gray-100"}`}
+            className={`flex items-center space-x-3 p-3 w-full text-left rounded-lg ${activeTab === "profile" ? "bg-blue-600" : "hover:bg-gray-600"}`}
             onClick={() => setActiveTab("profile")}
           >
-            <User className="h-5 w-5" />
-            <span>個人資料</span>
+            <User className="h-5 w-5 text-gray-300" />
+            <span className="text-gray-300">個人資料</span>
           </button>
           <button 
-            className={`flex items-center space-x-2 p-2 w-full text-left rounded ${activeTab === "orders" ? "bg-gray-200" : "hover:bg-gray-100"}`}
+            className={`flex items-center space-x-3 p-3 w-full text-left rounded-lg ${activeTab === "orders" ? "bg-blue-600" : "hover:bg-gray-600"}`}
             onClick={() => setActiveTab("orders")}
           >
-            <ShoppingCart className="h-5 w-5" />
-            <span>訂單資訊</span>
+            <ShoppingCart className="h-5 w-5 text-gray-300" />
+            <span className="text-gray-300">訂單資訊</span>
           </button>
           <button 
-            className={`flex items-center space-x-2 p-2 w-full text-left rounded ${activeTab === "notifications" ? "bg-gray-200" : "hover:bg-gray-100"}`}
+            className={`flex items-center space-x-3 p-3 w-full text-left rounded-lg ${activeTab === "notifications" ? "bg-blue-600" : "hover:bg-gray-600"}`}
             onClick={() => setActiveTab("notifications")}
           >
-            <Bell className="h-5 w-5" />
-            <span>通知</span>
+            <Bell className="h-5 w-5 text-gray-300" />
+            <span className="text-gray-300">通知</span>
           </button>
           <button 
-            className={`flex items-center space-x-2 p-2 w-full text-left rounded ${activeTab === "settings" ? "bg-gray-200" : "hover:bg-gray-100"}`}
+            className={`flex items-center space-x-3 p-3 w-full text-left rounded-lg ${activeTab === "settings" ? "bg-blue-600" : "hover:bg-gray-600"}`}
             onClick={() => setActiveTab("settings")}
           >
-            <Settings className="h-5 w-5" />
-            <span>設置</span>
+            <Settings className="h-5 w-5 text-gray-300" />
+            <span className="text-gray-300">設置</span>
           </button>
         </div>
       </div>
 
       {/* 主內容區 */}
-      <div className="flex-1 p-8 overflow-auto">
+      <div className="flex-1 p-8 bg-gray-50">
         {renderContent()}
       </div>
     </div>

@@ -26,43 +26,33 @@ import jakarta.persistence.Table;
 @Table(name = "restaurants")
 public class Restaurant {
 	
-    @Id
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** 餐廳名稱。 */
     @Column(nullable = false)
-    private String name;
+    private String name;  // 餐廳名稱
 
-    /** 餐廳地址。 */
     @Column(nullable = false)
-    private String address;
+    private String address;  // 餐廳地址
 
-    /** 餐廳的平均消費金額。 */
     @Column(nullable = false)
-    private Double averageSpending;
+    private Double averageSpending;  // 餐廳的平均消費金額
 
-    /** 餐廳的標籤，例如「日式」、「韓式」。 */
-    @ElementCollection
-    private List<String> tags = new ArrayList<>();
-
-    /** 餐廳的圖片（以 Base64 格式儲存）。 */
     @Lob
-    private String imageBase64;
+    private String imageBase64;  // 餐廳圖片（以 Base64 格式儲存）
 
-    /** 餐廳的可預約時間段（日期 -> 時間段）。 */
-    @ElementCollection
-    @MapKeyColumn(name = "date")
-    @Column(name = "time_slots")
-    private Map<String, List<String>> availableTimes = new HashMap<>();
-
-    /** 該餐廳的擁有者（商戶）。 */
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
-    private BusinessUser owner;
+    private User owner;  // 餐廳的擁有者（商戶）
 
-    /** 該餐廳的所有預約列表。 */
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Reservation> reservations = new ArrayList<>();
+    private List<Reservation> reservations = new ArrayList<>();  // 餐廳的所有預約列表
+
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RestaurantTag> tags = new ArrayList<>();  // 餐廳標籤
+
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RestaurantAvailability> availabilities = new ArrayList<>();  // 餐廳的可預約時間
     
 }

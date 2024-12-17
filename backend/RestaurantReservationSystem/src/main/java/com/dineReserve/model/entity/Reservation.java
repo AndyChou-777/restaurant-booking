@@ -25,7 +25,7 @@ public class Reservation {
     /** 預約的用戶。 */
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private GeneralUser user;
+    private User user;
 
     /** 預約的餐廳。 */
     @ManyToOne

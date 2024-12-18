@@ -28,12 +28,21 @@ public class GlobalExceptionHandler {
 		}
 		
 		String message = null;
-		HttpStatus status = null;
+		HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
 		
 		if (ex instanceof UnauthorizedException) {
-			message = ex.getMessage().isEmpty()? messageSource.getMessage("exception.unauthorized", null, locale) : ex.getMessage();
+			message = ex.getMessage().isEmpty()? messageSource.getMessage("使用者未登入或登入錯誤!", null, locale) : ex.getMessage();
 			status = HttpStatus.FORBIDDEN;
-		}
+		} else if (ex instanceof PasswordInvalidException) {
+			message = ex.getMessage().isEmpty()? messageSource.getMessage("密碼錯誤!", null, locale) : ex.getMessage();
+			status = HttpStatus.BAD_REQUEST;
+		} else if (ex instanceof UserNotFoundException) {
+	        message = ex.getMessage().isEmpty() ? messageSource.getMessage("未找到該使用者!", null, locale) : ex.getMessage();
+	        status = HttpStatus.NOT_FOUND;
+	    } else {
+	    	message = actualException.getMessage();
+	        status = HttpStatus.INTERNAL_SERVER_ERROR;
+	    }
 		
 		ApiResponse<String> response = ApiResponse.error(status.value(), message);
 		return ResponseEntity.status(status).body(response);

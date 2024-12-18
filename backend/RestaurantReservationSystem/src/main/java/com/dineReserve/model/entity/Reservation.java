@@ -10,10 +10,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Data;
 
 /**
  * 用於表示餐廳的預約，包括預約時間、狀態及相關用戶與餐廳。
  */
+
+@Data
 @Entity
 @Table(name = "reservations")
 public class Reservation {

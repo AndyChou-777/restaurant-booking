@@ -22,9 +22,9 @@ public class RestaurantDTO {
     private String name;  // 餐廳名稱
     private String address;  // 餐廳地址
     private Double averageSpending;  // 餐廳的平均消費金額
-    private String imageBase64;  // 餐廳圖片（以 Base64 格式儲存）
     private UserDTO owner;  // 餐廳擁有者（商戶）
 
+    private List<RestaurantImageDTO> images = new ArrayList<>();  // 餐廳的多張圖片
     private List<RestaurantTagDTO> tags = new ArrayList<>();  // 餐廳標籤
     private List<RestaurantAvailabilityDTO> availabilities = new ArrayList<>();  // 餐廳可預約時間段
     

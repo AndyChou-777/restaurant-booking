@@ -18,10 +18,13 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.Data;
 
 /**
  * 用於表示餐廳，包含其基本資訊、標籤與可預約時間。
  */
+
+@Data
 @Entity
 @Table(name = "restaurants")
 public class Restaurant {
@@ -39,8 +42,8 @@ public class Restaurant {
     @Column(nullable = false)
     private Double averageSpending;  // 餐廳的平均消費金額
 
-    @Lob
-    private String imageBase64;  // 餐廳圖片（以 Base64 格式儲存）
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RestaurantImage> images = new ArrayList<>();  // 餐廳的多張圖片
 
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)

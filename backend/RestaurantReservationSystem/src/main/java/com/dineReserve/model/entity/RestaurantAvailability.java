@@ -1,5 +1,6 @@
 package com.dineReserve.model.entity;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,24 +13,31 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import lombok.Data;
 
+@Data
 @Entity
 @Table(name = "restaurant_availabilities")
 public class RestaurantAvailability {
 	
-    @Id
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id", nullable = false)
-    private Restaurant restaurant;  // 這個可預約時間段所屬的餐廳
+    private Restaurant restaurant;
 
     @Column(nullable = false)
-    private String date;  // 可預約的日期（例如：2024-12-25）
+    @Temporal(TemporalType.DATE)
+    private java.util.Date date;
 
-    @ElementCollection
-    @Column(name = "time_slots")
-    private List<String> timeSlots = new ArrayList<>();  // 可預約的時間段（例如：12:00 - 14:00）
+    @Column(nullable = false)
+    private LocalTime startTime;
+
+    @Column(nullable = false)
+    private LocalTime endTime;
 
 }

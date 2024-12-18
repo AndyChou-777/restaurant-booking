@@ -1,5 +1,7 @@
 package com.dineReserve.model.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 /**
@@ -8,10 +10,11 @@ import lombok.Data;
 @Data
 public class LoginRequestDTO {
 
-    @Email(message = "Please provide a valid email address")
-    @NotEmpty(message = "Email cannot be empty")
+    @Email(message = "請輸入有效的電子信箱!")
+    @NotEmpty(message = "電子信箱欄位不可為空!")
     private String email; // 用戶電子郵件
 
-    @NotEmpty(message = "Password cannot be empty")
+    @NotEmpty(message = "密碼欄位不可為空!")
     private String password; // 用戶密碼
+    
 }

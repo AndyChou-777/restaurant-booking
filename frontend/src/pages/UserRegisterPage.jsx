@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { registerGeneralUser } from '@/service/authService'
 
 function UserRegisterPage() {
   const [isIntroPhase, setIsIntroPhase] = useState(true)
@@ -10,14 +11,27 @@ function UserRegisterPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (password !== confirmPassword) {
-      alert('密碼確認不符，請重新輸入');
+      alert("密碼確認不符，請重新輸入");
       return;
     }
-    alert('一般用戶註冊成功！');
-    // 提交表單後的處理邏輯
+
+    try {
+      const data = await registerGeneralUser(name, email, password);
+
+      if (data.message === "一般用戶註冊成功!") {
+        alert("一般用戶註冊成功!");
+        window.location.href = "/";
+      } else {
+        alert("一般用戶註冊失敗!");
+      }
+    } catch (error) {
+      console.error("註冊錯誤:", error);
+      alert("伺服器錯誤，請稍後再試。");
+    }
   };
 
   return (
@@ -104,6 +118,7 @@ function UserRegisterPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="設定密碼"
+                  minLength="8" // 密碼至少 8 字
                   required
                   className="mt-2"
                 />

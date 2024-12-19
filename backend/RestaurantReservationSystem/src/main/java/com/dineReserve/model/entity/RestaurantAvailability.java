@@ -40,4 +40,10 @@ public class RestaurantAvailability {
     @Column(nullable = false)
     private LocalTime endTime;
 
+	@Override
+	public String toString() {
+		return "RestaurantAvailability [id=" + id + ", date=" + date + ", startTime=" + startTime + ", endTime="
+				+ endTime + "]";
+	}
+
 }

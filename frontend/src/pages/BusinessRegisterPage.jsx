@@ -2,19 +2,37 @@ import React, { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { registerBusinessUser } from '@/service/authService'
 
 function BusinessRegisterPage() {
-  const [isIntroPhase, setIsIntroPhase] = useState(true)
-  const [businessName, setBusinessName] = useState('')
-  const [email, setEmail] = useState('')
-  const [address, setAddress] = useState('')
-  const [representative, setRepresentative] = useState('')
+  const [isIntroPhase, setIsIntroPhase] = useState(true);
+  const [businessName, setBusinessName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    alert('企業用戶註冊成功！')
-    // 提交表單後的處理邏輯
-  }
+  const handleSubmit = async (e) => {
+      e.preventDefault();
+  
+      if (password !== confirmPassword) {
+        alert("密碼確認不符，請重新輸入");
+        return;
+      }
+  
+      try {
+        const data = await registerBusinessUser(businessName, email, password);
+  
+        if (data.message === "商業用戶註冊成功!") {
+          alert("企業用戶註冊成功!");
+          window.location.href = "/";
+        } else {
+          alert("企業用戶註冊成功!");
+        }
+      } catch (error) {
+        console.error("註冊錯誤:", error);
+        alert("伺服器錯誤，請稍後再試。");
+      }
+    };
 
   return (
     <div className="flex h-screen">
@@ -74,18 +92,18 @@ function BusinessRegisterPage() {
             <h2 className="text-2xl font-extrabold text-center text-gray-800">企業用戶註冊</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label>餐廳名稱</Label>
+                <Label>企業名稱</Label>
                 <Input
                   type="text"
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
-                  placeholder="輸入餐廳名稱"
+                  placeholder="輸入企業名稱"
                   required
                   className="mt-2"
                 />
               </div>
               <div>
-                <Label>電子郵件</Label>
+                <Label>企業電子郵件</Label>
                 <Input
                   type="email"
                   value={email}
@@ -96,23 +114,24 @@ function BusinessRegisterPage() {
                 />
               </div>
               <div>
-                <Label>餐廳地址</Label>
+                <Label>密碼</Label>
                 <Input
-                  type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder="輸入餐廳地址"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="設定密碼"
+                  minLength="8" // 密碼至少 8 字
                   required
                   className="mt-2"
                 />
               </div>
               <div>
-                <Label>負責人姓名</Label>
+                <Label>確認密碼</Label>
                 <Input
-                  type="text"
-                  value={representative}
-                  onChange={(e) => setRepresentative(e.target.value)}
-                  placeholder="輸入負責人姓名"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="再次輸入密碼"
                   required
                   className="mt-2"
                 />

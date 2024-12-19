@@ -26,4 +26,9 @@ public class UserContactInfo {
     @Column
     private String phoneNumber;
 
+	@Override
+	public String toString() {
+		return "UserContactInfo [id=" + id + ", phoneNumber=" + phoneNumber + "]";
+	}
+
 }

@@ -46,5 +46,11 @@ public class Reservation {
     /** 預約的狀態，例如「成功」、「取消」。 */
     @Column(nullable = false)
     private String status;
+
+	@Override
+	public String toString() {
+		return "Reservation [id=" + id + ", reservationTime=" + reservationTime + ", numberOfPeople=" + numberOfPeople
+				+ ", status=" + status + "]";
+	}
     
 }

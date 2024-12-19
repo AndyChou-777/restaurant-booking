@@ -47,4 +47,10 @@ public class User {
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
     private List<Restaurant> restaurants;
 
+	@Override
+	public String toString() {
+		return "User [id=" + id + ", email=" + email + ", passwordHash=" + passwordHash + ", salt=" + salt
+				+ ", username=" + username + ", role=" + role + "]";
+	}
+
 }

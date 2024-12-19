@@ -2,11 +2,14 @@ package com.dineReserve.model.dto;
 
 import com.dineReserve.enums.Role;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 用戶登入成功後的回應資料傳輸物件。
  */
+
 @Data
 public class LoginResponseDTO {
 

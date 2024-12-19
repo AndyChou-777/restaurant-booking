@@ -31,14 +31,17 @@ public class GlobalExceptionHandler {
 		HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
 		
 		if (ex instanceof UnauthorizedException) {
-			message = ex.getMessage().isEmpty()? messageSource.getMessage("使用者未登入或登入錯誤!", null, locale) : ex.getMessage();
+			message = ex.getMessage().isEmpty()? messageSource.getMessage("user.unauthorized", null, locale) : ex.getMessage();
 			status = HttpStatus.FORBIDDEN;
 		} else if (ex instanceof PasswordInvalidException) {
-			message = ex.getMessage().isEmpty()? messageSource.getMessage("密碼錯誤!", null, locale) : ex.getMessage();
+			message = ex.getMessage().isEmpty()? messageSource.getMessage("password.invalid", null, locale) : ex.getMessage();
 			status = HttpStatus.BAD_REQUEST;
 		} else if (ex instanceof UserNotFoundException) {
-	        message = ex.getMessage().isEmpty() ? messageSource.getMessage("未找到該使用者!", null, locale) : ex.getMessage();
+	        message = ex.getMessage().isEmpty() ? messageSource.getMessage("user.not.found", null, locale) : ex.getMessage();
 	        status = HttpStatus.NOT_FOUND;
+	    } else if (ex instanceof EmailAlreadyRegisteredException) {
+	        message = ex.getMessage().isEmpty() ? messageSource.getMessage("email.already.registered", null, locale) : ex.getMessage();
+	        status = HttpStatus.CONFLICT;
 	    } else {
 	    	message = actualException.getMessage();
 	        status = HttpStatus.INTERNAL_SERVER_ERROR;

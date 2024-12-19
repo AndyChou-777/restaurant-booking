@@ -57,5 +57,11 @@ public class Restaurant {
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RestaurantAvailability> availabilities = new ArrayList<>();  // 餐廳的可預約時間
+
+	@Override
+	public String toString() {
+		return "Restaurant [id=" + id + ", name=" + name + ", address=" + address + ", averageSpending="
+				+ averageSpending + "]";
+	}
     
 }

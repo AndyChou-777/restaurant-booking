@@ -28,4 +28,9 @@ public class RestaurantImage {
     @JoinColumn(name = "restaurant_id", nullable = false)
     private Restaurant restaurant;  // 關聯的餐廳
 
+	@Override
+	public String toString() {
+		return "RestaurantImage [id=" + id + ", imageBase64=" + imageBase64 + "]";
+	}
+
 }

@@ -24,6 +24,9 @@ public class LoginServiceImpl implements LoginService{
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private HttpSession session;
 
     // 登入邏輯
     public LoginResponseDTO login(LoginRequestDTO loginRequestDto) {
@@ -40,6 +43,7 @@ public class LoginServiceImpl implements LoginService{
         // 儲存登入狀態到 Session
         HttpSession session = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getSession();
         session.setAttribute("userId", user.getId());
+        session.setAttribute("username", user.getUsername());
         session.setAttribute("role", user.getRole());
 
         // 返回登入成功的資料
@@ -53,4 +57,12 @@ public class LoginServiceImpl implements LoginService{
             session.invalidate(); // 銷毀 Session
         }
     }
+    
+    // 檢查登入狀態
+    public boolean isUserLoggedIn() {
+        // 假設用戶的 ID 被存儲在 Session 中，使用 "userId" 作為鍵
+        return session.getAttribute("userId") != null;
+    }
+    
+    
 }

@@ -9,4 +9,6 @@ public interface LoginService {
 	
 	public void logout(); // 登出邏輯 --> Session 清空
 	
+	public boolean isUserLoggedIn(); // 檢查登入
+	
 }

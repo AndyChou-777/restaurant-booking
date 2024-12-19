@@ -26,4 +26,9 @@ public class RestaurantTag {
     @Column(nullable = false)
     private String tag;  // 單一標籤（例如日式、韓式）
 
+	@Override
+	public String toString() {
+		return "RestaurantTag [id=" + id + ", tag=" + tag + "]";
+	}
+
 }

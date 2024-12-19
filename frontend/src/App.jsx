@@ -11,8 +11,30 @@ import UserDashboard from './pages/UserDashboard';
 import BusinessDashboard from './pages/BusinessDashboard';
 import RestaurantBookingApp from './pages/RestaurantBookingApp';
 import 'tailwindcss/tailwind.css'; // 引入 tailwindcss
+import { checkSession } from './service/authService';
+import { useState, useEffect } from "react";
 
 function App() {
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  {/*
+  useEffect(() => {
+    const initializeLoginStatus = async () => {
+      try {
+        const apiResponse = await checkSession();
+        if (apiResponse.message === "用戶已登入")
+        setIsLoggedIn(true);
+      } catch (error) {
+        console.error("無法檢查登入狀態:", error);
+        alert("無法連接到伺服器，請檢查網路連線或伺服器狀態。");
+      }
+    };
+
+    initializeLoginStatus();
+  }, []);
+  */}
+
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       {/* 使用了新的 future flag，讓相對路徑解析行為提前符合 v7 的邏輯 */}

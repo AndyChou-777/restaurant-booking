@@ -39,7 +39,7 @@ export const registerBusinessUser = async (businessName, email, password) => {
 };
 
 // 登入
-export const login = async (username, password) => {
+export const login = async (email, password) => {
   const url = `${API_BASE_URL}/login`;
   const response = await fetch(url, {
     method: 'POST',
@@ -47,7 +47,7 @@ export const login = async (username, password) => {
       'Content-Type': 'application/json',
     },
     credentials: "include",
-    body: JSON.stringify({ username, password}),
+    body: JSON.stringify({ email, password}),
   });
 
   if (!response.ok) {

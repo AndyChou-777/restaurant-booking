@@ -9,11 +9,14 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
+import { logout } from "@/service/authService";
 
 function Header() {
 
   const navigationMenuTriggerStyle = () => 
     cn("group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none")
+
+  
 
   return (
     <header className="bg-[#333] flex justify-between items-center p-[10px_20px] text-white relative">

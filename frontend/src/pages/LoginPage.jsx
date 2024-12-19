@@ -3,8 +3,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { login } from '@/service/authService'
 
 function LoginPage() {
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    try {
+      const data = login(username, password); // 使用登入服務方法
+
+      if (data.date.role === "登入成功") {
+        setIsLoggedIn(true);
+        alert("登入成功");
+        window.location.href = "/business/dashboard";
+      } else {
+        alert("登入失敗");
+      }
+    } catch (error) {
+      console.error("登入錯誤:", error);
+    }
+
+  };
+
   return (
     <div className="flex h-screen">
       {/* 左側背景圖 */}

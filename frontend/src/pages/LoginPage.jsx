@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label"
 import { login } from '@/service/authService'
 import { useNavigate } from 'react-router-dom'
 
-function LoginPage() {
+function LoginPage( { setIsLoggedIn, setUserRole } ) {
   const navigate = useNavigate();
   const [error, setError] = useState('');
   
@@ -31,6 +31,8 @@ function LoginPage() {
       const response = await login(personalForm.email, personalForm.password);
       if (response.status === 200) {
         if (response.data.role === "GENERAL_USER") {
+          setIsLoggedIn(true);
+          setUserRole('GENERAL');
           alert('登入成功!');
           navigate('/user/dashboard');
         } else {
@@ -52,6 +54,8 @@ function LoginPage() {
       const response = await login(enterpriseForm.account, enterpriseForm.password);
       if (response.status === 200) {
         if (response.data.role === "BUSINESS_USER") {
+        setIsLoggedIn(true);
+        setUserRole('BUSINESS');
         alert('登入成功!');
         navigate('/business/dashboard');
         } else {

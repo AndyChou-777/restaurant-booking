@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { User, ShoppingCart, Bell, Settings } from "lucide-react"
+import { checkSession } from "@/service/authService"
+import { useNavigate } from "react-router-dom"
 
 // 模拟获取用户数据的函数
 const fetchUserData = () => {
@@ -41,12 +43,33 @@ function UserDashboard() {
   const [userData, setUserData] = useState(null)
   const [editData, setEditData] = useState({ name: "", email: "" })
   const [activeTab, setActiveTab] = useState("profile")
+  const navigate = useNavigate();
 
   useEffect(() => {
     const data = fetchUserData()
     setUserData(data)
     setEditData({ name: data.name, email: data.email })
   }, [])
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const apiResponse = await checkSession(); // 使用判斷是否已登入服務方法
+        if (apiResponse.message === "用戶已登入") {
+          if (apiResponse.data.role === "BUSINESS_USER") {
+            alert("請先登出後，改用企業帳號登入!");
+            navigate('/');
+          }
+        } 
+      } catch (error) {
+        console.error("無法檢查登入狀態:", error);
+        alert("使用者未登入，請先登入以進行操作!");
+        navigate('/login');
+      }
+    };
+
+    checkLoginStatus();
+  }, []);
 
   const handleSaveProfile = () => {
     setUserData(prev => ({

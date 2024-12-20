@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { 
   Card, 
   CardContent, 
@@ -29,6 +29,8 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/components/ui/alert"
+import { useNavigate } from "react-router-dom"
+import { checkSession } from "@/service/authService"
 
 function BusinessDashboard() {
   const [activeTab, setActiveTab] = useState("restaurants")
@@ -71,11 +73,36 @@ function BusinessDashboard() {
     },
     reservationDates: []
   })
-  const [selectedRestaurant, setSelectedRestaurant] = useState(null)
-  const [selectedDates, setSelectedDates] = useState([])
-  const [showAlert, setShowAlert] = useState(false)
-  const [alertTitle, setAlertTitle] = useState(null)
-  const [alertDescription, setAlertDescription] = useState(null)
+
+  const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+  const [selectedDates, setSelectedDates] = useState([]);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState(null);
+  const [alertDescription, setAlertDescription] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+      const checkLoginStatus = async () => {
+        try {
+          const apiResponse = await checkSession(); // 使用判斷是否已登入服務方法
+          if (apiResponse.message === "用戶已登入") {
+            if (apiResponse.data.role === "GENERAL_USER") {
+              alert("身分別錯誤，請改用一般帳號登入!");
+              navigate('/login');
+            }
+          } else {
+            alert("用戶未登入，請先進行登入!");
+            navigate('/login');
+          }
+        } catch (error) {
+          console.error("無法檢查登入狀態:", error);
+          alert("使用者未登入，請先登入以進行操作!");
+          navigate('/');
+        }
+      };
+  
+      checkLoginStatus();
+    }, []);
 
   const showTemporaryAlert = (title, description) => {
     

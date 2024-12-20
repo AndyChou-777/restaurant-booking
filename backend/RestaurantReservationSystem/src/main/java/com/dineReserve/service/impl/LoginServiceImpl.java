@@ -42,7 +42,9 @@ public class LoginServiceImpl implements LoginService{
 
         // 儲存登入狀態到 Session
         HttpSession session = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getSession();
+        
         session.setAttribute("userId", user.getId());
+        session.setAttribute("email", user.getEmail());
         session.setAttribute("username", user.getUsername());
         session.setAttribute("role", user.getRole());
 
@@ -59,8 +61,10 @@ public class LoginServiceImpl implements LoginService{
     }
     
     // 檢查登入狀態
-    public boolean isUserLoggedIn() {
-        // 假設用戶的 ID 被存儲在 Session 中，使用 "userId" 作為鍵
+    public String isUserLoggedIn() {
+        if ( session.getAttribute("userId") == "BUSINESS_USER") {
+        	return session.getAttribute("userId") != null;
+        }
         return session.getAttribute("userId") != null;
     }
     

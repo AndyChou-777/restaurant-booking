@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dineReserve.enums.Role;
 import com.dineReserve.exception.EmailAlreadyRegisteredException;
 import com.dineReserve.exception.PasswordInvalidException;
 import com.dineReserve.exception.UserNotFoundException;
@@ -89,7 +90,15 @@ public class AuthController {
     @GetMapping("/session")
     public ResponseEntity<ApiResponse<LoginResponseDTO>> checkSession(HttpSession session) {
         if (loginService.isUserLoggedIn()) {
-            return ResponseEntity.ok(ApiResponse.success("用戶已登入", null));
+        	
+        	Long userId = (Long)session.getAttribute("userId");
+        	String email = (String) session.getAttribute("email");
+        	String username = (String) session.getAttribute("username");
+        	Role role = (Role) session.getAttribute("role");
+            
+            LoginResponseDTO responseDto = new LoginResponseDTO(userId, email, username, role);
+
+            return ResponseEntity.ok(ApiResponse.success("用戶已登入", responseDto));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.error(401, "用戶未登入"));

@@ -9,52 +9,11 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
-import { logout } from "@/service/authService";
-import { checkSession } from "@/service/authService";
 
-function Header( {setIsLoggedIn, isLoggedIn, userRole, setUserRole} ) {
+function Header( {isLoggedIn, userRole, handleLogout, showTemporaryAlert} ) {
 
   const navigationMenuTriggerStyle = () => 
     cn("group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none")
-
-  {/* 使用 useEffect 去控制登入狀態來顯示 navBar 登入或登出 --> setRole 來決定顯示一般或企業登入 */}
-
-  const handleLogout = async () => {
-    try {
-      const apiResponse = await logout(); // 使用登出服務方法
-      setIsLoggedIn(false);
-      setUserRole('');
-      alert('用戶登出成功!');
-    } catch (error) {
-      console.error("登出錯誤:", error);
-    }
-  };
-
-  useEffect(() => {
-    const initializeLoginStatus = async () => {
-      try {
-        const apiResponse = await checkSession(); // 使用判斷是否已登入服務方法
-        if (apiResponse.message === '登入成功') {
-          setIsLoggedIn(true);
-          if ( apiResponse.data.role === 'GENERAL_USER') {
-            setUserRole('GENERAL');
-            console.log(userRole);
-          } else {
-            setUserRole('BUSINESS');
-            console.log(userRole);
-          }
-        } else {
-          setIsLoggedIn(true);
-          setUserRole('');
-        }
-      } catch (error) {
-        console.error("無法檢查登入狀態:", error);
-      }
-    };
-
-    initializeLoginStatus();
-  }, []);
-
 
   return (
     <header className="bg-[#333] flex justify-between items-center p-[10px_20px] text-white relative">
@@ -88,7 +47,6 @@ function Header( {setIsLoggedIn, isLoggedIn, userRole, setUserRole} ) {
       </NavigationMenuItem>
 
     {isLoggedIn? (
-      
       <NavigationMenuItem>
       <NavigationMenuTrigger>會員中心</NavigationMenuTrigger>
       <NavigationMenuContent className="absolute left-0 bg-gray-800 w-full max-w-[700px] p-4 box-border">
@@ -104,9 +62,11 @@ function Header( {setIsLoggedIn, isLoggedIn, userRole, setUserRole} ) {
             此外，還可享受我們的會員專屬優惠。
           </ListItem>
           )}
-          <ListItem href="/" title="登出"
-           onClick={() => {
+          <ListItem href="#" title="登出"
+           onClick={(e) => {
+            e.preventDefault();
             handleLogout();
+            showTemporaryAlert('登出成功', '用戶登出成功', '/');  // 指定跳轉到首頁
           }}>
             當您完成使用網站時，可以隨時選擇登出。登出後，您的帳戶資料將會保護，避免他人查看或修改您的資料。
             記得在公共電腦或其他設備上登出，確保資料安全。
@@ -131,7 +91,7 @@ function Header( {setIsLoggedIn, isLoggedIn, userRole, setUserRole} ) {
     }
 
     <NavigationMenuItem>
-      <NavigationMenuTrigger>測試用Bar</NavigationMenuTrigger>
+      <NavigationMenuTrigger>{userRole || '未設定角色'}</NavigationMenuTrigger>
       <NavigationMenuContent className="absolute left-0 bg-gray-800 w-full max-w-[700px] p-4 box-border">
         <ul className="grid bg-gray-800 text-white w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
           <ListItem href="/business/dashboard" title="企業會員管理">

@@ -3,10 +3,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { login } from '@/service/authService'
 import { useNavigate } from 'react-router-dom'
+import Alert from '@/components/Alert'
 
-function LoginPage( { setIsLoggedIn, setUserRole } ) {
+function LoginPage( { handleLogin } ) {
   const navigate = useNavigate();
   const [error, setError] = useState('');
   
@@ -22,50 +22,14 @@ function LoginPage( { setIsLoggedIn, setUserRole } ) {
     password: ''
   });
 
-  // 處理一般用戶表單提交
-  const handlePersonalSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    
-    try {
-      const response = await login(personalForm.email, personalForm.password);
-      if (response.status === 200) {
-        if (response.data.role === "GENERAL_USER") {
-          setIsLoggedIn(true);
-          setUserRole('GENERAL');
-          alert('登入成功!');
-          navigate('/user/dashboard');
-        } else {
-          setError('登入身分別不符，請切換身分別登入');
-          return;
-        }
-      }
-    } catch (error) {
-      setError(error.message || '登入失敗');
-    }
+  const handleSubmitPersonal = (e) => {
+    e.preventDefault();  // 防止頁面刷新
+    handleLogin(personalForm.email, personalForm.password);
   };
 
-  // 處理企業用戶表單提交
-  const handleEnterpriseSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    
-    try {
-      const response = await login(enterpriseForm.account, enterpriseForm.password);
-      if (response.status === 200) {
-        if (response.data.role === "BUSINESS_USER") {
-        setIsLoggedIn(true);
-        setUserRole('BUSINESS');
-        alert('登入成功!');
-        navigate('/business/dashboard');
-        } else {
-          setError('登入身分別不符，請切換身分別登入');
-          return;
-        }
-      }
-    } catch (error) {
-      setError(error.message || '登入失敗');
-    }
+  const handleSubmitEnterprise = (e) => {
+    e.preventDefault();  // 防止頁面刷新
+    handleLogin(enterpriseForm.account, enterpriseForm.password);
   };
 
   return (
@@ -90,7 +54,7 @@ function LoginPage( { setIsLoggedIn, setUserRole } ) {
           
           {/* 一般用戶登入 */}
           <TabsContent value="personal">
-            <form onSubmit={handlePersonalSubmit} className="space-y-4">
+            <form onSubmit={handleSubmitPersonal} className="space-y-4">
               <h2 className="text-2xl font-bold text-center text-gray-800">一般用戶登入</h2>
               <div className="space-y-3">
                 <div>
@@ -135,7 +99,7 @@ function LoginPage( { setIsLoggedIn, setUserRole } ) {
 
           {/* 企業用戶登入 */}
           <TabsContent value="enterprise">
-            <form onSubmit={handleEnterpriseSubmit} className="space-y-4">
+            <form onSubmit={handleSubmitEnterprise} className="space-y-4">
               <h2 className="text-2xl font-bold text-center text-gray-800">企業用戶登入</h2>
               <div className="space-y-3">
                 <div>

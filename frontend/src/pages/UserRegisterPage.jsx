@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { registerGeneralUser } from '@/service/authService'
+import { useNavigate } from 'react-router-dom'
 
 function UserRegisterPage() {
   const [isIntroPhase, setIsIntroPhase] = useState(true)
@@ -10,6 +11,7 @@ function UserRegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,7 +26,7 @@ function UserRegisterPage() {
 
       if (data.message === "一般用戶註冊成功!") {
         alert("一般用戶註冊成功!");
-        window.location.href = "/";
+        navigate('/');
       } else {
         alert("一般用戶註冊失敗!");
       }

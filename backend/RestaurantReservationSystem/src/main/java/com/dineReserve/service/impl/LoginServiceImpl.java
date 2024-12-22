@@ -61,10 +61,7 @@ public class LoginServiceImpl implements LoginService{
     }
     
     // 檢查登入狀態
-    public String isUserLoggedIn() {
-        if ( session.getAttribute("userId") == "BUSINESS_USER") {
-        	return session.getAttribute("userId") != null;
-        }
+    public boolean isUserLoggedIn() {
         return session.getAttribute("userId") != null;
     }
     

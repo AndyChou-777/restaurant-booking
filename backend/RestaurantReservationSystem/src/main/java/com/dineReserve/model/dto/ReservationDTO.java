@@ -16,11 +16,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ReservationDTO {
 	
-	private Long id;  // 預約 ID
-    private UserDTO user;  // 預約的用戶
-    private RestaurantDTO restaurant;  // 預約的餐廳
-    private LocalDateTime reservationTime;  // 預約時間
-    private Integer numberOfPeople;  // 預約人數
-    private String status;  // 預約狀態
+	private Long id;
+    private Long restaurantId;
+    private Long userId;
+    private LocalDateTime reservationTime;
+    private Integer numberOfPeople;
+    private String status;
     
 }

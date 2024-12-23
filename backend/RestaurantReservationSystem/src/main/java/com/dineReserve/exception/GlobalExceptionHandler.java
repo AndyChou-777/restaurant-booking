@@ -42,6 +42,9 @@ public class GlobalExceptionHandler {
 	    } else if (ex instanceof EmailAlreadyRegisteredException) {
 	        message = ex.getMessage().isEmpty() ? messageSource.getMessage("email.already.registered", null, locale) : ex.getMessage();
 	        status = HttpStatus.CONFLICT;
+	    } else if (ex instanceof ResourceNotFoundException) {
+	        message = ex.getMessage().isEmpty() ? messageSource.getMessage("resource.not.found", null, locale) : ex.getMessage();
+	        status = HttpStatus.NOT_FOUND;
 	    } else {
 	    	message = actualException.getMessage();
 	        status = HttpStatus.INTERNAL_SERVER_ERROR;

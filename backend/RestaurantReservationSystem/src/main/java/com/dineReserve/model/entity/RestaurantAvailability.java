@@ -1,5 +1,6 @@
 package com.dineReserve.model.entity;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,19 +32,24 @@ public class RestaurantAvailability {
     private Restaurant restaurant;
 
     @Column(nullable = false)
-    @Temporal(TemporalType.DATE)
-    private java.util.Date date;
+    private LocalDate startDate;  // 改用 LocalDate 代替 Date
 
     @Column(nullable = false)
-    private LocalTime startTime;
+    private LocalDate endDate;    // 新增結束日期
 
     @Column(nullable = false)
-    private LocalTime endTime;
+    private LocalTime startTime;  // 每天的開始時間
 
-	@Override
-	public String toString() {
-		return "RestaurantAvailability [id=" + id + ", date=" + date + ", startTime=" + startTime + ", endTime="
-				+ endTime + "]";
-	}
+    @Column(nullable = false)
+    private LocalTime endTime;    // 每天的結束時間
+
+    @Override
+    public String toString() {
+        return "RestaurantAvailability [id=" + id + 
+               ", startDate=" + startDate + 
+               ", endDate=" + endDate + 
+               ", startTime=" + startTime + 
+               ", endTime=" + endTime + "]";
+    }
 
 }

@@ -1,7 +1,9 @@
 package com.dineReserve.service.impl;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.dineReserve.exception.ResourceNotFoundException;
 import com.dineReserve.model.dto.ReservationDTO;
-import com.dineReserve.model.dto.RestaurantAvailabilityDTO;
+import com.dineReserve.model.dto.AvailabilityDTO;
 import com.dineReserve.model.dto.RestaurantDTO;
 import com.dineReserve.model.dto.RestaurantSearchDTO;
 import com.dineReserve.model.entity.Reservation;
@@ -111,7 +113,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     public ReservationDTO updateReservation(Long id, ReservationDTO dto) {
         Reservation reservation = reservationRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
+            .orElseThrow(() -> new ResourceNotFoundException());
 
         if (!reservation.getReservationTime().equals(dto.getReservationTime())) {
             validateAvailability(dto.getRestaurantId(), dto.getReservationTime());
@@ -125,7 +127,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     public void cancelReservation(Long id) {
         Reservation reservation = reservationRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
+            .orElseThrow(() -> new ResourceNotFoundException());
         reservation.setStatus("CANCELLED");
         reservationRepository.save(reservation);
     }
@@ -138,31 +140,133 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Override
-    public void addAvailability(RestaurantAvailability dto) {
+    public void addAvailability(AvailabilityDTO dto) {
+        // 驗證日期範圍
+        if (dto.getEndDate().isBefore(dto.getStartDate())) {
+            throw new IllegalArgumentException("結束日期不能早於開始日期");
+        }
+
+        // 檢查時間範圍是否有重疊
+        boolean hasOverlap = availabilityRepository.hasOverlappingAvailability(
+            dto.getRestaurantId(), 
+            dto.getStartDate(), 
+            dto.getEndDate()
+        );
+
+        if (hasOverlap) {
+            throw new IllegalStateException("指定的日期範圍與現有的可用時間重疊");
+        }
+
+        // 使用 ModelMapper 轉換 DTO 至實體類別
         RestaurantAvailability availability = modelMapper.map(dto, RestaurantAvailability.class);
         availability.setRestaurant(restaurantRepository.getReferenceById(dto.getRestaurantId()));
+
         availabilityRepository.save(availability);
+    }
+    
+    @Override
+    public void updateAvailability(Long availabilityId, AvailabilityDTO dto) {
+        RestaurantAvailability availability = availabilityRepository.findById(availabilityId)
+            .orElseThrow(() -> new ResourceNotFoundException());
+
+        // 驗證日期範圍
+        if (dto.getEndDate().isBefore(dto.getStartDate())) {
+            throw new IllegalArgumentException("結束日期不能早於開始日期");
+        }
+
+        // 檢查時間範圍是否與其他記錄重疊（排除當前記錄）
+        boolean hasOverlap = availabilityRepository.hasOverlappingAvailabilityExcluding(
+            dto.getRestaurantId(),
+            dto.getStartDate(),
+            dto.getEndDate(),
+            availabilityId
+        );
+
+        if (hasOverlap) {
+            throw new IllegalStateException("指定的日期範圍與其他時段重疊");
+        }
+
+        // 檢查是否有在此時段的預約
+        List<Reservation> existingReservations = reservationRepository.findByRestaurantId(dto.getRestaurantId())
+            .stream()
+            .filter(r -> {
+                LocalDate reservationDate = r.getReservationTime().toLocalDate();
+                return !reservationDate.isBefore(dto.getStartDate()) && 
+                       !reservationDate.isAfter(dto.getEndDate()) &&
+                       "CONFIRMED".equals(r.getStatus());
+            })
+            .collect(Collectors.toList());
+
+        if (!existingReservations.isEmpty()) {
+            throw new IllegalStateException("無法修改該時段，已有確認的預約存在");
+        }
+
+        // 更新可用時段
+        availability.setStartDate(dto.getStartDate());
+        availability.setEndDate(dto.getEndDate());
+        availability.setStartTime(dto.getStartTime());
+        availability.setEndTime(dto.getEndTime());
+
+        availabilityRepository.save(availability);
+    }
+    
+    @Override
+    public void deleteAvailability(Long availabilityId) {
+        RestaurantAvailability availability = availabilityRepository.findById(availabilityId)
+            .orElseThrow(() -> new ResourceNotFoundException());
+
+        // 檢查是否有在此時段的預約
+        List<Reservation> existingReservations = reservationRepository.findByRestaurantId(availability.getRestaurant().getId())
+            .stream()
+            .filter(r -> {
+                LocalDate reservationDate = r.getReservationTime().toLocalDate();
+                return !reservationDate.isBefore(availability.getStartDate()) && 
+                       !reservationDate.isAfter(availability.getEndDate()) &&
+                       "CONFIRMED".equals(r.getStatus());
+            })
+            .collect(Collectors.toList());
+
+        if (!existingReservations.isEmpty()) {
+            throw new IllegalStateException("無法刪除該時段，已有確認的預約存在");
+        }
+
+        availabilityRepository.delete(availability);
+    }
+    
+    @Override
+    public List<AvailabilityDTO> getRestaurantAllAvailabilities(Long restaurantId) {
+        // 檢查餐廳是否存在
+        if (!restaurantRepository.existsById(restaurantId)) {
+            throw new ResourceNotFoundException();
+        }
+
+        // 直接使用 ModelMapper 進行對象映射
+        return availabilityRepository.findByRestaurantIdOrderByStartDateAsc(restaurantId)
+            .stream()
+            .map(availability -> modelMapper.map(availability, AvailabilityDTO.class))  // 直接映射
+            .collect(Collectors.toList());
     }
 
     @Override
-    public List<RestaurantAvailabilityDTO> getAvailability(Long restaurantId, Date date) {
-        return availabilityRepository.findByRestaurantIdAndDate(restaurantId, date).stream()
-                .map(availability -> modelMapper.map(availability, RestaurantAvailabilityDTO.class))
-                .collect(Collectors.toList());
+    public List<AvailabilityDTO> getAvailability(Long restaurantId, LocalDate date) {
+        return availabilityRepository.findByRestaurantIdAndDate(restaurantId, date)
+            .stream()
+            .map(entity -> modelMapper.map(entity, AvailabilityDTO.class))  // 使用 ModelMapper 轉換
+            .collect(Collectors.toList());
     }
 
     private void validateAvailability(Long restaurantId, LocalDateTime reservationTime) {
         List<RestaurantAvailability> availabilities = 
             availabilityRepository.findByRestaurantIdAndDate(
                 restaurantId, 
-                Date.from(reservationTime.toInstant())
+                reservationTime.toLocalDate()
             );
-
+        
         boolean isAvailable = availabilities.stream()
             .anyMatch(a -> isTimeInRange(reservationTime.toLocalTime(), a.getStartTime(), a.getEndTime()));
-
+            
         if (!isAvailable) {
-            throw new IllegalStateException("Selected time is not available");
+            throw new IllegalStateException("所選時間不可預約");
         }
     }
 

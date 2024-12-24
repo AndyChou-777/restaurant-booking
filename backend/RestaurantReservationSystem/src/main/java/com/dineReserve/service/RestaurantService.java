@@ -1,9 +1,11 @@
 package com.dineReserve.service;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
 import com.dineReserve.model.dto.ReservationDTO;
+import com.dineReserve.model.dto.AvailabilityDTO;
 import com.dineReserve.model.dto.RestaurantDTO;
 import com.dineReserve.model.dto.RestaurantSearchDTO;
 import com.dineReserve.model.entity.RestaurantAvailability;
@@ -26,7 +28,10 @@ public interface RestaurantService {
     List<ReservationDTO> getUserReservations(Long userId);
     
     // 可用時間管理
-    void addAvailability(RestaurantAvailability availabilityDTO);
-    List<RestaurantAvailability> getAvailability(Long restaurantId, Date date);
+    void addAvailability(AvailabilityDTO availabilityDTO);
+    void updateAvailability(Long availabilityId, AvailabilityDTO availabilityDTO);
+    void deleteAvailability(Long availabilityId);
+    List<AvailabilityDTO> getRestaurantAllAvailabilities(Long restaurantId);
+    List<AvailabilityDTO> getAvailability(Long restaurantId, LocalDate date);
 	
 }

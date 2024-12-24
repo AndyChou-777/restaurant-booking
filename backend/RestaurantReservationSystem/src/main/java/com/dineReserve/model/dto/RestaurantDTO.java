@@ -1,9 +1,13 @@
 package com.dineReserve.model.dto;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -29,6 +33,10 @@ public class RestaurantDTO {
     @NotBlank(message = "餐廳地址不可為空")
     @Size(max = 50, message = "餐廳地址長度不可超過50字")
     private String address;
+    
+    @NotBlank(message = "餐廳描述不可為空")
+    @Size(max = 100, message = "餐廳描述長度不可超過100字")
+    private String description;
 
     @NotNull(message = "平均消費不可為空")
     @Positive(message = "平均消費必須為正數")
@@ -39,5 +47,19 @@ public class RestaurantDTO {
 
     @Size(max = 5, message = "標籤數量不可超過5個")
     private List<String> tags;
+    
+    @NotNull(message = "開始日期不能為空")
+    @PastOrPresent(message = "開始日期不能為未來日期")
+    private LocalDate startDate;
+    
+    @NotNull(message = "結束日期不能為空")
+    @FutureOrPresent(message = "結束日期不能為過去日期")
+    private LocalDate endDate;
+    
+    @NotNull(message = "開始時間不能為空")
+    private LocalTime startTime;
+    
+    @NotNull(message = "結束時間不能為空")
+    private LocalTime endTime;
     
 }

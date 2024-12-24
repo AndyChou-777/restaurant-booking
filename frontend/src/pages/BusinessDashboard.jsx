@@ -31,6 +31,12 @@ import {
 } from "@/components/ui/alert"
 import { useNavigate } from "react-router-dom"
 import { checkSession } from "@/service/authService"
+import { 
+  createRestaurant, 
+  updateRestaurant, 
+  deleteRestaurant,
+  searchRestaurants 
+} from "@/service/restaurantService"
 
 function BusinessDashboard() {
   const [activeTab, setActiveTab] = useState("restaurants")
@@ -64,15 +70,17 @@ function BusinessDashboard() {
     phone: "0912345678"
   })
   const [newRestaurant, setNewRestaurant] = useState({
-    name: "",
-    address: "",
-    introduction: "",
-    hours: {
-      morning: "",
-      evening: ""
-    },
-    reservationDates: []
-  })
+    name: "", // 餐廳名稱
+    address: "", // 餐廳地址
+    description: "", // 餐廳描述
+    averageSpending: "", // 平均消費金額
+    imageBase64List: [], // 圖片的 Base64 編碼列表
+    tags: [], // 餐廳標籤
+    startDate: "", // 開始日期 (YYYY-MM-DD)
+    endDate: "", // 結束日期 (YYYY-MM-DD)
+    startTime: "", // 營業開始時間 (HH:mm)
+    endTime: "" // 營業結束時間 (HH:mm)
+  });
 
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [selectedDates, setSelectedDates] = useState([]);
@@ -137,22 +145,9 @@ function BusinessDashboard() {
   }
 
   const handleCreateNewRestaurant = () => {
-    const newId = (restaurants.length + 1).toString()
-    setRestaurants(prev => [...prev, {
-      ...newRestaurant,
-      id: newId,
-      reservationDates: selectedDates
-    }])
     
-    // Reset form
-    setNewRestaurant({
-      name: "",
-      address: "",
-      introduction: "",
-      hours: { morning: "", evening: "" },
-    })
-    setSelectedDates([])
-    showTemporaryAlert('建立成功!', '餐廳已成功建立，請前往管理頁面進行確認。')
+    createRestaurant(newRestaurant);
+
   }
 
   const renderContent = () => {
@@ -204,77 +199,141 @@ function BusinessDashboard() {
           </Card>
         )
 
-      case "new-restaurant":
-        return (
-          <Card className="bg-white text-black shadow-lg hover:shadow-2xl transition-all duration-300">
-            <CardHeader>
-              <CardTitle>新增餐廳</CardTitle>
-              <CardDescription>建立您的新餐廳</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <Label>餐廳名稱</Label>
-                  <Input 
-                    value={newRestaurant.name}
-                    onChange={(e) => setNewRestaurant(prev => ({...prev, name: e.target.value}))}
-                  />
-                </div>
-                <div>
-                  <Label>餐廳地址</Label>
-                  <Input 
-                    value={newRestaurant.address}
-                    onChange={(e) => setNewRestaurant(prev => ({...prev, address: e.target.value}))}
-                  />
-                </div>
-                <div>
-                  <Label>餐廳介紹</Label>
-                  <Textarea 
-                    value={newRestaurant.introduction}
-                    onChange={(e) => setNewRestaurant(prev => ({...prev, introduction: e.target.value}))}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
+        case "new-restaurant":
+          return (
+            <Card className="bg-white text-black shadow-lg hover:shadow-2xl transition-all duration-300">
+              <CardHeader>
+                <CardTitle>新增餐廳</CardTitle>
+                <CardDescription>建立您的新餐廳</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* 餐廳名稱 */}
                   <div>
-                    <Label>早班營業時間</Label>
-                    <Input 
-                      placeholder="例如: 07:00-11:00"
-                      value={newRestaurant.hours.morning}
-                      onChange={(e) => setNewRestaurant(prev => ({
-                        ...prev, 
-                        hours: {...prev.hours, morning: e.target.value}
-                      }))}
+                    <Label>餐廳名稱</Label>
+                    <Input
+                      value={newRestaurant.name}
+                      onChange={(e) => setNewRestaurant(prev => ({ ...prev, name: e.target.value }))}
                     />
                   </div>
+        
+                  {/* 餐廳地址 */}
                   <div>
-                    <Label>晚班營業時間</Label>
-                    <Input 
-                      placeholder="例如: 17:00-22:00"
-                      value={newRestaurant.hours.evening}
-                      onChange={(e) => setNewRestaurant(prev => ({
-                        ...prev, 
-                        hours: {...prev.hours, evening: e.target.value}
-                      }))}
+                    <Label>餐廳地址</Label>
+                    <Input
+                      value={newRestaurant.address}
+                      onChange={(e) => setNewRestaurant(prev => ({ ...prev, address: e.target.value }))}
                     />
                   </div>
+        
+                  {/* 餐廳描述 */}
+                  <div>
+                    <Label>餐廳描述</Label>
+                    <Textarea
+                      value={newRestaurant.description}
+                      onChange={(e) => setNewRestaurant(prev => ({ ...prev, description: e.target.value }))}
+                    />
+                  </div>
+        
+                  {/* 平均消費金額 */}
+                  <div>
+                    <Label>平均消費金額</Label>
+                    <Input
+                      type="number"
+                      value={newRestaurant.averageSpending}
+                      onChange={(e) => setNewRestaurant(prev => ({ ...prev, averageSpending: e.target.value }))}
+                    />
+                  </div>
+        
+                  {/* 營業日期 */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>開始日期</Label>
+                      <Input
+                        type="date"
+                        value={newRestaurant.startDate}
+                        onChange={(e) => setNewRestaurant(prev => ({ ...prev, startDate: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <Label>結束日期</Label>
+                      <Input
+                        type="date"
+                        value={newRestaurant.endDate}
+                        onChange={(e) => setNewRestaurant(prev => ({ ...prev, endDate: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+        
+                  {/* 營業時間 */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>營業開始時間</Label>
+                      <Input
+                        type="time"
+                        value={newRestaurant.startTime}
+                        onChange={(e) => setNewRestaurant(prev => ({ ...prev, startTime: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <Label>營業結束時間</Label>
+                      <Input
+                        type="time"
+                        value={newRestaurant.endTime}
+                        onChange={(e) => setNewRestaurant(prev => ({ ...prev, endTime: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+        
+                  {/* 餐廳標籤 */}
+                  <div>
+                    <Label>餐廳標籤</Label>
+                    <Input
+                      placeholder="請輸入標籤（以逗號分隔）"
+                      value={newRestaurant.tags.join(", ")}
+                      onChange={(e) =>
+                        setNewRestaurant(prev => ({
+                          ...prev,
+                          tags: e.target.value.split(",").map(tag => tag.trim())
+                        }))
+                      }
+                    />
+                  </div>
+        
+                  {/* 圖片上傳 */}
+                  <div>
+                    <Label>餐廳圖片</Label>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files || []);
+                        const readers = files.map(file => {
+                          const reader = new FileReader();
+                          reader.readAsDataURL(file);
+                          return new Promise(resolve => {
+                            reader.onload = () => resolve(reader.result);
+                          });
+                        });
+                        Promise.all(readers).then(images =>
+                          setNewRestaurant(prev => ({ ...prev, imageBase64List: images }))
+                        );
+                      }}
+                    />
+                  </div>
+        
+                  {/* 提交按鈕 */}
+                  <Button
+                    onClick={handleCreateNewRestaurant}
+                    className="border border-black rounded-[8px]"
+                  >
+                    <PlusCircle className="mr-2 h-4 w-4" /> 建立餐廳
+                  </Button>
                 </div>
-                <div>
-                  <Label>可預約日期</Label>
-                  <Calendar
-                    mode="multiple"
-                    selected={selectedDates}
-                    onSelect={setSelectedDates}
-                    className="rounded-md border"
-                  />
-                </div>
-                <Button onClick={handleCreateNewRestaurant}
-                        className="border border-black rounded-[8px]">
-                  <PlusCircle className="mr-2 h-4 w-4" /> 建立餐廳
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )
+              </CardContent>
+            </Card>
+          );
 
       case "account":
         return (

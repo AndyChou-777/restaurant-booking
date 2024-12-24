@@ -35,7 +35,7 @@ import jakarta.validation.Valid;
  * */
 
 @RestController
-@RequestMapping("/api/reservations")
+@RequestMapping("/omotenashi")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class AuthController {
 

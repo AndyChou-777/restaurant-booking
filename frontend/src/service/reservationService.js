@@ -1,13 +1,14 @@
-const API_BASE_URL = 'http://localhost:8080/omotenashi'; // 後端伺服器地址
+const API_BASE_URL = 'http://localhost:8080/api/reservations'; // 後端伺服器地址
 
 // 創建預約
 export const createReservation = async (reservationData) => {
-  const url = `${API_BASE_URL}/omotenashi`;
+  const url = API_BASE_URL;
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
     body: JSON.stringify(reservationData),
   });
 
@@ -21,12 +22,13 @@ export const createReservation = async (reservationData) => {
 
 // 更新預約
 export const updateReservation = async (id, reservationData) => {
-  const url = `${API_BASE_URL}/omotenashi/reservation/${id}`;
+  const url = `${API_BASE_URL}/reservation/${id}`;
   const response = await fetch(url, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
     body: JSON.stringify(reservationData),
   });
 
@@ -40,12 +42,13 @@ export const updateReservation = async (id, reservationData) => {
 
 // 取消預約
 export const cancelReservation = async (id) => {
-  const url = `${API_BASE_URL}/omotenashi/reservation/${id}`;
+  const url = `${API_BASE_URL}/reservation/${id}`;
   const response = await fetch(url, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -58,12 +61,13 @@ export const cancelReservation = async (id) => {
 
 // 獲取用戶預約
 export const getUserReservations = async (userId) => {
-  const url = `${API_BASE_URL}/omotenashi/user/${userId}`;
+  const url = `${API_BASE_URL}/user/${userId}`;
   const response = await fetch(url, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
   });
 
   if (!response.ok) {

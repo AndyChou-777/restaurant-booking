@@ -49,8 +49,20 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     public RestaurantDTO createRestaurant(RestaurantDTO dto) {
+        // 創建餐廳
         Restaurant restaurant = modelMapper.map(dto, Restaurant.class);
         restaurant = restaurantRepository.save(restaurant);
+        
+        // 創建可用時間
+        RestaurantAvailability availability = new RestaurantAvailability();
+        availability.setRestaurant(restaurant);
+        availability.setStartDate(dto.getStartDate());
+        availability.setEndDate(dto.getEndDate());
+        availability.setStartTime(dto.getStartTime());
+        availability.setEndTime(dto.getEndTime());
+        
+        availabilityRepository.save(availability);
+        
         return modelMapper.map(restaurant, RestaurantDTO.class);
     }
 

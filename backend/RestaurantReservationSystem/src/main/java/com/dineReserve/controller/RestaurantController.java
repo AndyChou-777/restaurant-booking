@@ -32,7 +32,6 @@ public class RestaurantController {
     private RestaurantService restaurantService;
 
     @PostMapping("/create")
-    @CheckUserSession
     public ResponseEntity<ApiResponse<RestaurantDTO>> createRestaurant(@Valid @RequestBody RestaurantDTO restaurantDTO) {
         RestaurantDTO createdRestaurant = restaurantService.createRestaurant(restaurantDTO);
         return ResponseEntity.ok(ApiResponse.success("餐廳建立成功!", createdRestaurant));

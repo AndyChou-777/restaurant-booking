@@ -41,6 +41,10 @@ public class Restaurant {
 
     @Column(nullable = false)
     private Double averageSpending;  // 餐廳的平均消費金額
+    
+    @Lob
+    @Column(nullable = false)
+    private String description; // 餐廳描述
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RestaurantImage> images = new ArrayList<>();  // 餐廳的多張圖片
@@ -58,10 +62,10 @@ public class Restaurant {
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RestaurantAvailability> availabilities = new ArrayList<>();  // 餐廳的可預約時間
 
-	@Override
-	public String toString() {
-		return "Restaurant [id=" + id + ", name=" + name + ", address=" + address + ", averageSpending="
-				+ averageSpending + "]";
-	}
+    @Override
+    public String toString() {
+        return "Restaurant [id=" + id + ", name=" + name + ", address=" + address + ", averageSpending="
+                + averageSpending + ", description=" + description + "]";
+    }
     
 }

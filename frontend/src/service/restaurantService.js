@@ -1,13 +1,14 @@
-const API_BASE_URL = 'http://localhost:8080/omotenashi'; // 後端伺服器地址
+const API_BASE_URL = 'http://localhost:8080/api/restaurants'; // 後端伺服器地址
 
 // 創建餐廳
 export const createRestaurant = async (restaurantData) => {
-  const url = `${API_BASE_URL}/api/restaurants/create`;
+  const url = `${API_BASE_URL}/create`;
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
     body: JSON.stringify(restaurantData),
   });
 
@@ -21,12 +22,13 @@ export const createRestaurant = async (restaurantData) => {
 
 // 更新餐廳
 export const updateRestaurant = async (id, restaurantData) => {
-  const url = `${API_BASE_URL}/api/restaurants/restaurants/${id}`;
+  const url = `${API_BASE_URL}/restaurants/${id}`;
   const response = await fetch(url, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
     body: JSON.stringify(restaurantData),
   });
 
@@ -40,12 +42,13 @@ export const updateRestaurant = async (id, restaurantData) => {
 
 // 刪除餐廳
 export const deleteRestaurant = async (id) => {
-  const url = `${API_BASE_URL}/api/restaurants/restaurants/${id}`;
+  const url = `${API_BASE_URL}/restaurants/${id}`;
   const response = await fetch(url, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -58,12 +61,13 @@ export const deleteRestaurant = async (id) => {
 
 // 搜索餐廳
 export const searchRestaurants = async (searchData = {}) => {
-  const url = `${API_BASE_URL}/api/restaurants`;
+  const url = API_BASE_URL;
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
     body: JSON.stringify(searchData),
   });
 

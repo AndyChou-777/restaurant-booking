@@ -23,7 +23,7 @@ import com.dineReserve.service.RestaurantService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/omotenashi/{restaurantId}")
+@RequestMapping("/api/restaurants/{restaurantId}/availabilities")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class RestaurantAvailabilityController {
     

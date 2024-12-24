@@ -37,7 +37,7 @@ public class ReservationController {
         return ResponseEntity.ok(ApiResponse.success("預約建立成功!", createdReservation));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/reservation/{id}")
     @CheckUserSession
     public ResponseEntity<ApiResponse<ReservationDTO>> updateReservation(
             @PathVariable Long id,
@@ -46,7 +46,7 @@ public class ReservationController {
         return ResponseEntity.ok(ApiResponse.success("預約更新成功!", updatedReservation));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/reservation/{id}")
     @CheckUserSession
     public ResponseEntity<ApiResponse<Void>> cancelReservation(@PathVariable Long id) {
         restaurantService.cancelReservation(id);

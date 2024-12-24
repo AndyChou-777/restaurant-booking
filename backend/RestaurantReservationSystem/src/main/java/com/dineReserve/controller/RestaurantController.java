@@ -24,21 +24,21 @@ import com.dineReserve.service.RestaurantService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/omotenashi")
+@RequestMapping("/api/restaurants")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class RestaurantController {
 	
 	@Autowired
     private RestaurantService restaurantService;
 
-    @PostMapping
+    @PostMapping("/create")
     @CheckUserSession
     public ResponseEntity<ApiResponse<RestaurantDTO>> createRestaurant(@Valid @RequestBody RestaurantDTO restaurantDTO) {
         RestaurantDTO createdRestaurant = restaurantService.createRestaurant(restaurantDTO);
         return ResponseEntity.ok(ApiResponse.success("餐廳建立成功!", createdRestaurant));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/restaurants/{id}")
     @CheckUserSession
     public ResponseEntity<ApiResponse<RestaurantDTO>> updateRestaurant(
     		@PathVariable Long id,
@@ -47,7 +47,7 @@ public class RestaurantController {
         return ResponseEntity.ok(ApiResponse.success("餐廳更新成功!", updatedRestaurant));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/restaurants/{id}")
     @CheckUserSession
     public ResponseEntity<ApiResponse<Void>> deleteRestaurant(@PathVariable Long id) {
         restaurantService.deleteRestaurant(id);

@@ -16,11 +16,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dineReserve.aop.CheckUserSession;
+import com.dineReserve.model.dto.LoginResponseDTO;
 import com.dineReserve.model.dto.RestaurantDTO;
 import com.dineReserve.model.dto.RestaurantSearchDTO;
 import com.dineReserve.response.ApiResponse;
 import com.dineReserve.service.RestaurantService;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
 @RestController
@@ -32,8 +34,18 @@ public class RestaurantController {
     private RestaurantService restaurantService;
 
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<RestaurantDTO>> createRestaurant(@Valid @RequestBody RestaurantDTO restaurantDTO) {
-        RestaurantDTO createdRestaurant = restaurantService.createRestaurant(restaurantDTO);
+    public ResponseEntity<ApiResponse<RestaurantDTO>> createRestaurant(
+    		@Valid @RequestBody RestaurantDTO restaurantDTO,
+    		HttpSession session) {
+    	
+    	LoginResponseDTO responseDTO = (LoginResponseDTO) session.getAttribute("loginDTO");
+    	
+    	System.out.println("獲得 Session 成功: " + responseDTO);
+    	
+    	Long userId = responseDTO.getId();
+    	
+    	System.out.println("獲得 UserId 成功: " + userId);
+        RestaurantDTO createdRestaurant = restaurantService.createRestaurant(userId, restaurantDTO);
         return ResponseEntity.ok(ApiResponse.success("餐廳建立成功!", createdRestaurant));
     }
 

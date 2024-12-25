@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
  */
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class LoginResponseDTO {
 
     private Long id; // 用戶 ID
@@ -18,10 +20,4 @@ public class LoginResponseDTO {
     private String username; // 用戶名稱
     private Role role; // 用戶角色（如商業用戶或一般用戶）
 
-    public LoginResponseDTO(Long id, String email, String username, Role role) {
-        this.id = id;
-        this.email = email;
-        this.username = username;
-        this.role = role;
-    }
 }

@@ -93,7 +93,7 @@ function BusinessDashboard() {
       const checkLoginStatus = async () => {
         try {
           const apiResponse = await checkSession(); // 使用判斷是否已登入服務方法
-          if (apiResponse.message === "用戶已登入") {
+          if (apiResponse.message === "登入成功") {
             if (apiResponse.data.role === "GENERAL_USER") {
               alert("身分別錯誤，請改用一般帳號登入!");
               navigate('/login');
@@ -144,11 +144,17 @@ function BusinessDashboard() {
 
   }
 
-  const handleCreateNewRestaurant = () => {
-    
-    createRestaurant(newRestaurant);
-
-  }
+  const handleCreateNewRestaurant = async () => {
+    try {
+        console.log('Sending restaurant data:', newRestaurant); // 添加日誌
+        const response = await createRestaurant(newRestaurant);
+        console.log('Response:', response); // 添加日誌
+        showTemporaryAlert('成功', '餐廳創建成功！');
+    } catch (error) {
+        console.error('Error details:', error); // 添加詳細錯誤日誌
+        showTemporaryAlert('錯誤', error.message);
+    }
+};
 
   const renderContent = () => {
     switch(activeTab) {

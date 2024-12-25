@@ -51,7 +51,7 @@ function Header( {isLoggedIn, userRole, handleLogout, showTemporaryAlert} ) {
       <NavigationMenuTrigger>會員中心</NavigationMenuTrigger>
       <NavigationMenuContent className="absolute left-0 bg-gray-800 w-full max-w-[700px] p-4 box-border">
         <ul className="grid bg-gray-800 text-white w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-        {userRole === 'BUSINESS' ? (
+        {userRole === 'BUSINESS_USER' ? (
           <ListItem href="/business/dashboard" title="企業會員管理">
             管理您的預約狀態，增加顧客的來源。企業會員可以享受更多的功能，如設定特別優惠，查看預約統計數據，
             以及增加顧客忠誠度的工具。

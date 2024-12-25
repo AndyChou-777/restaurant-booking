@@ -1,5 +1,8 @@
 package com.dineReserve.service.impl;
 
+import java.util.Optional;
+
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -9,6 +12,7 @@ import com.dineReserve.exception.PasswordInvalidException;
 import com.dineReserve.exception.UserNotFoundException;
 import com.dineReserve.model.dto.LoginRequestDTO;
 import com.dineReserve.model.dto.LoginResponseDTO;
+import com.dineReserve.model.dto.UserDTO;
 import com.dineReserve.model.entity.User;
 import com.dineReserve.repository.UserRepository;
 import com.dineReserve.service.LoginService;
@@ -26,44 +30,28 @@ public class LoginServiceImpl implements LoginService{
     private UserRepository userRepository;
     
     @Autowired
-    private HttpSession session;
+    private ModelMapper modelMapper;  
 
     // 登入邏輯
-    public LoginResponseDTO login(LoginRequestDTO loginRequestDto) {
+    public Optional<LoginResponseDTO> login(LoginRequestDTO loginRequestDto) {
+    	
         // 根據 email 查找用戶
-        User user = userRepository.findByEmail(loginRequestDto.getEmail())
-                .orElseThrow(() -> new UserNotFoundException());
-
-        // 驗證密碼（使用 Salt + Hash 的方法）
-        boolean isPasswordValid = PasswordUtil.verifyPassword(loginRequestDto.getPassword(), user.getPasswordHash(), user.getSalt());
-        if (!isPasswordValid) {
-            throw new PasswordInvalidException();
-        }
-
-        // 儲存登入狀態到 Session
-        HttpSession session = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getSession();
+        Optional<User> optUser = userRepository.findByEmail(loginRequestDto.getEmail());
         
-        session.setAttribute("userId", user.getId());
-        session.setAttribute("email", user.getEmail());
-        session.setAttribute("username", user.getUsername());
-        session.setAttribute("role", user.getRole());
+        // 檢查是否找到用戶
+        if (optUser.isPresent()) {
+            User user = optUser.get();
 
-        // 返回登入成功的資料
-        return new LoginResponseDTO(user.getId(), user.getEmail(), user.getUsername(), user.getRole());
-    }
+            // 驗證密碼（使用 Salt + Hash 的方法）
+            boolean isPasswordValid = PasswordUtil.verifyPassword(loginRequestDto.getPassword(), user.getPasswordHash(), user.getSalt());
 
-    // 登出邏輯
-    public void logout() {
-        HttpSession session = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getSession(false);
-        if (session != null) {
-            session.invalidate(); // 銷毀 Session
+            if (isPasswordValid) {
+                return Optional.of(modelMapper.map(user, LoginResponseDTO.class));
+            }
         }
+
+        // 密碼不正確或未找到用戶，返回空
+        return Optional.empty();
     }
-    
-    // 檢查登入狀態
-    public boolean isUserLoggedIn() {
-        return session.getAttribute("userId") != null;
-    }
-    
-    
+   
 }

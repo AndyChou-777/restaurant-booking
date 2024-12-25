@@ -13,7 +13,7 @@ import com.dineReserve.model.entity.RestaurantAvailability;
 public interface RestaurantService {
 
 	// 餐廳管理
-    RestaurantDTO createRestaurant(RestaurantDTO restaurantDTO);
+    RestaurantDTO createRestaurant(Long id, RestaurantDTO restaurantDTO);
     RestaurantDTO updateRestaurant(Long id, RestaurantDTO restaurantDTO);
     void deleteRestaurant(Long id);
     

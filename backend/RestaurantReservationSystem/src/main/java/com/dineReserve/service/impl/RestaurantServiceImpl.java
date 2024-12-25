@@ -4,8 +4,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dineReserve.exception.ResourceNotFoundException;
+import com.dineReserve.exception.UserNotFoundException;
 import com.dineReserve.model.dto.ReservationDTO;
 import com.dineReserve.model.dto.AvailabilityDTO;
 import com.dineReserve.model.dto.RestaurantDTO;
@@ -20,12 +23,18 @@ import com.dineReserve.model.dto.RestaurantSearchDTO;
 import com.dineReserve.model.entity.Reservation;
 import com.dineReserve.model.entity.Restaurant;
 import com.dineReserve.model.entity.RestaurantAvailability;
+import com.dineReserve.model.entity.RestaurantImage;
+import com.dineReserve.model.entity.RestaurantTag;
+import com.dineReserve.model.entity.User;
 import com.dineReserve.repository.ReservationRepository;
 import com.dineReserve.repository.RestaurantAvailabilityRepository;
+import com.dineReserve.repository.RestaurantImageRepository;
 import com.dineReserve.repository.RestaurantRepository;
+import com.dineReserve.repository.RestaurantTagRepository;
 import com.dineReserve.repository.UserRepository;
 import com.dineReserve.service.RestaurantService;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -37,9 +46,15 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Autowired
     private ReservationRepository reservationRepository;
+    
+    @Autowired
+    private RestaurantTagRepository restaurantTagRepository;
 
     @Autowired
     private RestaurantAvailabilityRepository availabilityRepository;
+    
+    @Autowired
+    private RestaurantImageRepository restaurantImageRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -48,22 +63,68 @@ public class RestaurantServiceImpl implements RestaurantService {
     private ModelMapper modelMapper;
 
     @Override
-    public RestaurantDTO createRestaurant(RestaurantDTO dto) {
-        // 創建餐廳
-        Restaurant restaurant = modelMapper.map(dto, Restaurant.class);
-        restaurant = restaurantRepository.save(restaurant);
+    public RestaurantDTO createRestaurant(Long userId, RestaurantDTO dto) {
+        System.out.println("開始執行");
         
-        // 創建可用時間
+        // 1. 檢查並獲取用戶
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException());
+        System.out.println("找到用戶: " + user);
+
+        // 2. 創建並設置餐廳基本信息
+        Restaurant restaurant = new Restaurant();
+        restaurant.setName(dto.getName());
+        restaurant.setAddress(dto.getAddress());
+        restaurant.setAverageSpending(dto.getAverageSpending());
+        restaurant.setDescription(dto.getDescription());
+        restaurant.setOwner(user);
+        
+        // 3. 先保存餐廳以獲取ID
+        Restaurant savedRestaurant = restaurantRepository.save(restaurant);
+        System.out.println("餐廳保存完成，ID: " + savedRestaurant.getId());
+
+        // 4. 創建並保存可用時間
         RestaurantAvailability availability = new RestaurantAvailability();
-        availability.setRestaurant(restaurant);
+        availability.setRestaurant(savedRestaurant);
         availability.setStartDate(dto.getStartDate());
         availability.setEndDate(dto.getEndDate());
         availability.setStartTime(dto.getStartTime());
         availability.setEndTime(dto.getEndTime());
-        
         availabilityRepository.save(availability);
+        System.out.println("可用時間保存完成: " + availability);
         
-        return modelMapper.map(restaurant, RestaurantDTO.class);
+        // 5. 創建並保存標籤
+        if (dto.getTags() != null && !dto.getTags().isEmpty()) {
+            List<RestaurantTag> tags = new ArrayList<>();
+            for (String tagName : dto.getTags()) {
+                RestaurantTag tag = new RestaurantTag();
+                tag.setTag(tagName);
+                tag.setRestaurant(savedRestaurant);
+                tags.add(tag);
+            }
+            restaurantTagRepository.saveAll(tags);
+            // 更新關聯
+            savedRestaurant.setTags(tags);
+        }
+        
+        // 6. 創建並保存圖片
+        if (dto.getImageBase64List() != null && !dto.getImageBase64List().isEmpty()) {
+            List<RestaurantImage> images = new ArrayList<>();
+            for (String imageBase64 : dto.getImageBase64List()) {
+                RestaurantImage img = new RestaurantImage();
+                img.setImageBase64(imageBase64);
+                img.setRestaurant(savedRestaurant);
+                images.add(img);
+            }
+            restaurantImageRepository.saveAll(images);
+            // 更新關聯
+            savedRestaurant.setImages(images);
+        }
+        
+        // 7. 再次保存餐廳以更新關聯
+        savedRestaurant = restaurantRepository.save(savedRestaurant);
+        
+        return modelMapper.map(savedRestaurant, RestaurantDTO.class);
     }
 
     @Override

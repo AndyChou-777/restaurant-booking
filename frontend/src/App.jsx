@@ -25,18 +25,28 @@ function App() {
   const [showAlert, setShowAlert] = useState(false);
   const [alertContent, setAlertContent] = useState({ title: '', description: '' });
 
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return localStorage.getItem('isLoggedIn') === 'true';
-  });
-  const [userRole, setUserRole] = useState(() => {
-    return localStorage.getItem('userRole') || '';
-  });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState('');
 
-  // 當 isLoggedIn 或 userRole 改變時，更新 localStorage
   useEffect(() => {
-    localStorage.setItem('isLoggedIn', isLoggedIn);
-    localStorage.setItem('userRole', userRole);
-  }, [isLoggedIn, userRole]);
+
+  const initializeLoginStatus = async () => {
+    try {
+      const apiResponse = await checkSession(); // 使用判斷是否已登入服務方法
+      
+      if (apiResponse.message === '登入成功') {
+        setIsLoggedIn(true);
+        apiResponse.data.role === 'GENERAL_USER' ? setUserRole('GENERAL_USER') : setUserRole('BUSINESS_USER');
+      }
+
+    } catch (error) {
+      console.error("無法檢查登入狀態:", error);
+      alert("無法連接到伺服器，請檢查網路連線或伺服器狀態。");
+    }
+  };
+
+  initializeLoginStatus();
+  }, []);
 
   const handleLogin = async (email, password) => {
     try {
@@ -44,20 +54,18 @@ function App() {
       
       if (apiResponse.data.role === 'GENERAL_USER') {
         setIsLoggedIn(true);
-        setUserRole('GENERAL');
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('userRole', 'GENERAL');
+        setUserRole('GENERAL_USER');
+        alert('登入成功!');
         window.location.href = '/user/dashboard' ;
       } else if (apiResponse.data.role === 'BUSINESS_USER') {
         setIsLoggedIn(true);
-        setUserRole('BUSINESS');
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('userRole', 'BUSINESS');
+        setUserRole('BUSINESS_USER');
         alert('登入成功!');
         window.location.href = '/business/dashboard';
       }
     } catch (error) {
-      setError(error.message || '登入失敗');
+      console.error(error.message || '登入失敗');
+      alert('登入失敗，請檢查帳號密碼!');
     }
   };
 
@@ -66,8 +74,6 @@ function App() {
       await logout();
       setIsLoggedIn(false);
       setUserRole('');
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('userRole');
     } catch (error) {
       console.error("登出錯誤:", error);
     }
@@ -105,7 +111,7 @@ function App() {
         {/* 定義路由 */}
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/login" element={<LoginPage setIsLoggedIn={setIsLoggedIn} setUserRole={setUserRole} handleLogin={handleLogin} />} />
+          <Route path="/login" element={<LoginPage handleLogin={handleLogin} />} />
           <Route path="/register/user" element={<UserRegisterPage />} />
           <Route path="/register/business" element={<BusinessRegisterPage />} />
           <Route path="/user/dashboard" element={<UserDashboard />} />

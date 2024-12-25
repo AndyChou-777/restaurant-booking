@@ -55,7 +55,7 @@ function UserDashboard() {
     const checkLoginStatus = async () => {
       try {
         const apiResponse = await checkSession(); // 使用判斷是否已登入服務方法
-        if (apiResponse.message === "用戶已登入") {
+        if (apiResponse.message === "登入成功") {
           if (apiResponse.data.role === "BUSINESS_USER") {
             alert("請先登出後，改用企業帳號登入!");
             navigate('/');

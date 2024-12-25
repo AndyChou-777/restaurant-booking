@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.dineReserve.exception.UnauthorizedException;
+import com.dineReserve.model.dto.LoginResponseDTO;
 import com.dineReserve.model.dto.UserDTO;
 
 import jakarta.servlet.http.HttpSession;
@@ -20,11 +21,11 @@ public class UserSessionCheckAspect {
 	@Before("@annotation(com.dineReserve.aop.CheckUserSession)")
 	public void checkGeneralUserSession() throws UnauthorizedException {
 		
-		// 取得 user 資訊
-		UserDTO userDto = (UserDTO)session.getAttribute("userDto");
+		// 取得 user 登入回傳資訊
+		LoginResponseDTO loginResponseDTO = (LoginResponseDTO) session.getAttribute("loginDTO");
 		
 		// 檢查用戶是否已經登入
-		if(userDto == null) {
+		if(loginResponseDTO == null) {
 			// 未登入, 拋出未授權例外
 			throw new UnauthorizedException("未登入或登入已過期，請重新登入!");
 		}

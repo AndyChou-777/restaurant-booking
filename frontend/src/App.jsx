@@ -85,7 +85,9 @@ function App() {
   
     setTimeout(() => {
       setShowAlert(false);
+      if (redirect !== null && redirect !== undefined) {
       window.location.href = redirect;  // 直接使用 window.location.href 跳轉
+      }
     }, 3000);
   };
 

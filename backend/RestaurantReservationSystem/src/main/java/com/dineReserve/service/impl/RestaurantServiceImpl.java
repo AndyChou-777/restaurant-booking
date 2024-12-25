@@ -105,6 +105,7 @@ public class RestaurantServiceImpl implements RestaurantService {
             restaurantTagRepository.saveAll(tags);
             // 更新關聯
             savedRestaurant.setTags(tags);
+            System.out.println("標籤保存完成: " + tags);
         }
         
         // 6. 創建並保存圖片
@@ -119,11 +120,12 @@ public class RestaurantServiceImpl implements RestaurantService {
             restaurantImageRepository.saveAll(images);
             // 更新關聯
             savedRestaurant.setImages(images);
+            System.out.println("圖片保存完成: " + images);
         }
         
         // 7. 再次保存餐廳以更新關聯
         savedRestaurant = restaurantRepository.save(savedRestaurant);
-        
+        System.out.println("再次儲存完成: " + savedRestaurant);
         return modelMapper.map(savedRestaurant, RestaurantDTO.class);
     }
 

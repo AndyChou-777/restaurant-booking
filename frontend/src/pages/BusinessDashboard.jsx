@@ -37,6 +37,7 @@ import {
   deleteRestaurant,
   searchRestaurants 
 } from "@/service/restaurantService"
+import { X } from "lucide-react"
 
 function BusinessDashboard() {
   const [activeTab, setActiveTab] = useState("restaurants")
@@ -146,10 +147,27 @@ function BusinessDashboard() {
 
   const handleCreateNewRestaurant = async () => {
     try {
-        console.log('Sending restaurant data:', newRestaurant); // 添加日誌
-        const response = await createRestaurant(newRestaurant);
-        console.log('Response:', response); // 添加日誌
-        showTemporaryAlert('成功', '餐廳創建成功！');
+        const apiResponse = await createRestaurant(newRestaurant);
+        if (apiResponse.message === '餐廳建立成功') {
+          showTemporaryAlert('成功', '餐廳創建成功！');
+
+           // 清空表單，將各個欄位重設為初始狀態
+          setNewRestaurant({
+            name: "", 
+            address: "",
+            description: "",
+            averageSpending: "",
+            imageBase64List: [],
+            tags: [],
+            startDate: "",
+            endDate: "",
+            startTime: "",
+            endTime: ""
+          });
+
+          setActiveTab('restaurants');
+        }
+
     } catch (error) {
         console.error('Error details:', error); // 添加詳細錯誤日誌
         showTemporaryAlert('錯誤', error.message);
@@ -306,27 +324,82 @@ function BusinessDashboard() {
                     />
                   </div>
         
-                  {/* 圖片上傳 */}
                   <div>
                     <Label>餐廳圖片</Label>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={(e) => {
-                        const files = Array.from(e.target.files || []);
-                        const readers = files.map(file => {
-                          const reader = new FileReader();
-                          reader.readAsDataURL(file);
-                          return new Promise(resolve => {
-                            reader.onload = () => resolve(reader.result);
-                          });
-                        });
-                        Promise.all(readers).then(images =>
-                          setNewRestaurant(prev => ({ ...prev, imageBase64List: images }))
-                        );
-                      }}
-                    />
+                    <div className="border-2 border-gray-200 rounded-lg p-4 bg-gray-50">
+                      <div className="flex items-center">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          className="hidden"
+                          id="file-upload"
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files || []);
+                            
+                            if (files.length + newRestaurant.imageBase64List.length > 4) {
+                              alert("最多只能上傳 4 張圖片！");
+                              return;
+                            }
+                            
+                            const readers = files.map(file => {
+                              const reader = new FileReader();
+                              reader.readAsDataURL(file);
+                              return new Promise(resolve => {
+                                reader.onload = () => resolve(reader.result);
+                              });
+                            });
+
+                            Promise.all(readers).then(images => {
+                              setNewRestaurant(prev => ({
+                                ...prev,
+                                imageBase64List: [...prev.imageBase64List, ...images]
+                              }));
+                            });
+                          }}
+                        />
+                        <label
+                          htmlFor="file-upload"
+                          className="inline-flex cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                        >
+                          選擇檔案
+                        </label>
+                        <span className="ml-4 text-black">
+                          {newRestaurant.imageBase64List.length 
+                            ? `已選擇 ${newRestaurant.imageBase64List.length} 個檔案` 
+                            : '尚未選擇檔案'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 預覽圖片 */}
+                  <div className="mt-4">
+                    <Label>預覽圖片</Label>
+                    <div className="flex gap-4">
+                      {newRestaurant.imageBase64List.map((image, index) => (
+                        <div key={index} className="relative">
+                          <img 
+                            src={image} 
+                            alt={`preview-${index}`} 
+                            className="w-32 h-32 object-cover rounded-md" 
+                          />
+                          {/* 顯示刪除按鈕 */}
+                          <button
+                            type="button"
+                            className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-lg transition-colors"
+                            onClick={() => {
+                              setNewRestaurant(prev => ({
+                                ...prev,
+                                imageBase64List: prev.imageBase64List.filter((_, idx) => idx !== index)
+                              }));
+                            }}
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
         
                   {/* 提交按鈕 */}

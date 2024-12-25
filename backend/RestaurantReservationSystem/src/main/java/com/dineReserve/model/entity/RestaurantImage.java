@@ -21,7 +21,7 @@ public class RestaurantImage {
     private Long id;  // 圖片 ID
 
     @Lob
-    @Column(nullable = false)
+    @Column(columnDefinition = "LONGTEXT", nullable = false)
     private String imageBase64;  // 圖片內容（以 Base64 格式儲存）
 
     @ManyToOne

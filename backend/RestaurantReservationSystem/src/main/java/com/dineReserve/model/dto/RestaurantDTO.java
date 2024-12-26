@@ -46,7 +46,7 @@ public class RestaurantDTO {
     private List<@NotBlank(message = "至少需要有一張圖片") String> imageBase64List;
 
     @Size(max = 5, message = "標籤數量不可超過5個")
-    private List<String> tags;
+    private List<@NotBlank(message = "至少需要設定一個標籤") String> tags;
     
     @NotNull(message = "時間段不能為空")
     @Size(min = 1, message = "至少需要有一個時間段")

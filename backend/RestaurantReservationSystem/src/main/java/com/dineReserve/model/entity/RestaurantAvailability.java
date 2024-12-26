@@ -16,9 +16,13 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "restaurant_availabilities")
 public class RestaurantAvailability {
@@ -51,5 +55,13 @@ public class RestaurantAvailability {
                ", startTime=" + startTime + 
                ", endTime=" + endTime + "]";
     }
+    
+    public RestaurantAvailability(Restaurant restaurant, LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime) {
+	    this.restaurant = restaurant;
+	    this.startDate = startDate;
+	    this.endDate = endDate;
+	    this.startTime = startTime;
+	    this.endTime = endTime;
+	}
 
 }

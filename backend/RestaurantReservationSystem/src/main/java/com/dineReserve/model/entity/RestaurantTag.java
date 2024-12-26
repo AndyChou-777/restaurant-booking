@@ -9,9 +9,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "restaurant_tags")
 public class RestaurantTag {
@@ -30,6 +34,11 @@ public class RestaurantTag {
 	@Override
 	public String toString() {
 		return "RestaurantTag [id=" + id + ", tag=" + tag + "]";
+	}
+	
+	public RestaurantTag(Restaurant restaurant, String tag) {
+	    this.restaurant = restaurant;
+	    this.tag = tag;
 	}
 
 }

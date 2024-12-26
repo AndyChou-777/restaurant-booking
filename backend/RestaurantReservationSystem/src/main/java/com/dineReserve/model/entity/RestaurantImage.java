@@ -9,9 +9,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "restaurant_images")
 public class RestaurantImage {
@@ -31,6 +35,11 @@ public class RestaurantImage {
 	@Override
 	public String toString() {
 		return "RestaurantImage [id=" + id + ", imageBase64=" + imageBase64 + "]";
+	}
+	
+	public RestaurantImage(Restaurant restaurant, String imageBase64) {
+	    this.restaurant = restaurant;
+	    this.imageBase64 = imageBase64;
 	}
 
 }

@@ -84,7 +84,7 @@ public class RestaurantServiceImpl implements RestaurantService {
         Restaurant savedRestaurant = restaurantRepository.save(restaurant);
         System.out.println("餐廳保存完成，ID: " + savedRestaurant.getId());
 
-        // 2. 保存時間段
+        // 4. 保存時間段
         for (TimeSlotDTO timeSlot : dto.getTimeSlots()) {
             RestaurantAvailability availability = new RestaurantAvailability();
             availability.setRestaurant(savedRestaurant);
@@ -133,21 +133,53 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     public RestaurantDTO updateRestaurant(Long id, RestaurantDTO dto) {
+    	// 獲取餐廳
         Restaurant restaurant = restaurantRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException());
-        modelMapper.map(dto, restaurant);
-        restaurant = restaurantRepository.save(restaurant);
-        return modelMapper.map(restaurant, RestaurantDTO.class);
+                .orElseThrow(() -> new ResourceNotFoundException());
+
+        // 更新基本資料
+        restaurant.setName(dto.getName());
+        restaurant.setAddress(dto.getAddress());
+        restaurant.setDescription(dto.getDescription());
+        restaurant.setAverageSpending(dto.getAverageSpending());
+        Restaurant savedRestaurant = restaurantRepository.save(restaurant);
+
+        // 清空並重新保存關聯的 Tags
+        restaurantTagRepository.deleteByRestaurantId(id);
+        List<RestaurantTag> newTags = dto.getTags().stream()
+                .map(tag -> new RestaurantTag(restaurant, tag))
+                .collect(Collectors.toList());
+        restaurantTagRepository.saveAll(newTags);
+
+        // 清空並重新保存關聯的 Images
+        restaurantImageRepository.deleteByRestaurantId(id);
+        List<RestaurantImage> newImages = dto.getImageBase64List().stream()
+                .map(base64 -> new RestaurantImage(restaurant, base64))
+                .collect(Collectors.toList());
+        restaurantImageRepository.saveAll(newImages);
+
+        // 清空並重新保存可預約時間段
+        availabilityRepository.deleteByRestaurantId(id);
+        List<RestaurantAvailability> newAvailabilities = dto.getTimeSlots().stream()
+                .map(timeSlot -> new RestaurantAvailability(
+                        restaurant, 
+                        timeSlot.getStartDate(), timeSlot.getEndDate(), 
+                        timeSlot.getStartTime(), timeSlot.getEndTime()))
+                .collect(Collectors.toList());
+        availabilityRepository.saveAll(newAvailabilities);
+
+        // 返回更新後的資料
+        savedRestaurant = restaurantRepository.save(savedRestaurant);
+        System.out.println("更新完成的 Restaurant: " + savedRestaurant);
+        return modelMapper.map(savedRestaurant, RestaurantDTO.class);
     }
 
     @Override
-    public void deleteRestaurant(Long id) {
-        Restaurant restaurant = restaurantRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException());
-        restaurantRepository.delete(restaurant);
-        
-        List<RestaurantTag> restaurantTags = restaurantTagRepository.findByRestaurantId(id);
-        
+    public void deleteRestaurant(Long id) {     
+    	Restaurant restaurant = restaurantRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("餐廳不存在"));
+
+            restaurantRepository.delete(restaurant);
     }
 
     @Override

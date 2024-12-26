@@ -55,6 +55,7 @@ public class RestaurantController {
     public ResponseEntity<ApiResponse<RestaurantDTO>> updateRestaurant(
     		@PathVariable Long id,
     		@Valid @RequestBody RestaurantDTO restaurantDTO) {
+    	System.out.println("實際收到的 DTO: " + restaurantDTO);
         RestaurantDTO updatedRestaurant = restaurantService.updateRestaurant(id, restaurantDTO);
         return ResponseEntity.ok(ApiResponse.success("餐廳更新成功", updatedRestaurant));
     }
@@ -64,7 +65,7 @@ public class RestaurantController {
     public ResponseEntity<ApiResponse<Void>> deleteRestaurant(@PathVariable Long id) {
         restaurantService.deleteRestaurant(id);
         return ResponseEntity.ok(ApiResponse.success("餐廳刪除成功", null));
-    }
+    } 
 
     @PostMapping
     public ResponseEntity<ApiResponse<List<RestaurantDTO>>> searchRestaurants(

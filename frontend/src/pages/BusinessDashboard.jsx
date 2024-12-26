@@ -21,8 +21,7 @@ import {
   Trash2,
   Edit
 } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Calendar } from "@/components/ui/calendar"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { AlertCircle } from "lucide-react"
 import {
   Alert,
@@ -37,8 +36,29 @@ import {
   deleteRestaurant,
   searchRestaurants 
 } from "@/service/restaurantService"
-import { X } from "lucide-react"
+import { Store, 
+  MapPin, 
+  FileText, 
+  DollarSign, 
+  Tags, 
+  Calendar, 
+  Clock, 
+  Image as ImageIcon,
+  Plus,
+  X,
+  Save } from "lucide-react"
 import { fetchRestaurants } from "@/service/restaurantService"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 function BusinessDashboard() {
   const [activeTab, setActiveTab] = useState("restaurants");
@@ -54,7 +74,6 @@ function BusinessDashboard() {
     startTime: "",
     endTime: "",
   });
-  const [timeSlots, setTimeSlots] = useState([]);
   const [newRestaurant, setNewRestaurant] = useState({
     name: "", // 餐廳名稱
     address: "", // 餐廳地址
@@ -69,6 +88,7 @@ function BusinessDashboard() {
   const [showAlert, setShowAlert] = useState(false);
   const [alertTitle, setAlertTitle] = useState(null);
   const [alertDescription, setAlertDescription] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -103,7 +123,7 @@ function BusinessDashboard() {
               id: restaurant.id,
               name: restaurant.name,
               address: restaurant.address,
-              introduction: restaurant.description,
+              description: restaurant.description,
               averageSpending: restaurant.averageSpending,
               timeSlots: restaurant.timeSlots && restaurant.timeSlots.length > 0
                 ? restaurant.timeSlots.map(slot => ({
@@ -141,25 +161,41 @@ function BusinessDashboard() {
     }, 3000); 
   };
 
-  const handleDeleteRestaurant = (id) => {
-    setRestaurants(prev => prev.filter(restaurant => restaurant.id !== id))
-    showTemporaryAlert('刪除成功', '餐廳資料已成功刪除')
-  }
+  const handleDeleteRestaurant = async (id) => {
+    try {
+      const apiResponse = await deleteRestaurant(id);
+      if(apiResponse.message === '餐廳刪除成功') {
+        setRestaurants(prev => prev.filter(restaurant => restaurant.id !== id));
+        showTemporaryAlert('刪除成功', '餐廳資料已成功刪除')
+      }
+    } catch (error) {
+      console.error('Error details:', error);
+      showTemporaryAlert('錯誤', error.message);
+    }
+  };
 
   const handleEditRestaurant = (restaurant) => {
     setSelectedRestaurant(restaurant)
+    console.log(selectedRestaurant);
   }
 
-  const handleSaveRestaurant = () => {
+  const handleSaveRestaurant = async (id, restaurantDate) => {
     if (selectedRestaurant) {
-      setRestaurants(prev => 
-        prev.map(r => r.id === selectedRestaurant.id ? selectedRestaurant : r)
-      )
-      setSelectedRestaurant(null)
+      try {
+        const apiResponse = await updateRestaurant(id, restaurantDate);
+        if (apiResponse === '餐廳更新成功') {
+          setRestaurants(prev => 
+            prev.map(r => r.id === selectedRestaurant.id ? selectedRestaurant : r)
+          )
+          setSelectedRestaurant(null)
+          console.log(apiResponse);
+          showTemporaryAlert('修改成功!', '餐廳資料已成功更新');
+        }
+      } catch (error) {
+        console.error('更新餐廳時出現錯誤:', error);
+        showTemporaryAlert('錯誤', '無法更新餐廳，請稍後再試');
+      }
     }
-
-    showTemporaryAlert('修改成功!', '餐廳資料已成功更新');
-
   }
 
   const handleCreateNewRestaurant = async () => {
@@ -170,16 +206,13 @@ function BusinessDashboard() {
 
            // 清空表單，將各個欄位重設為初始狀態
           setNewRestaurant({
-            name: "", 
+            name: "",
             address: "",
             description: "",
             averageSpending: "",
             imageBase64List: [],
             tags: [],
-            startDate: "",
-            endDate: "",
-            startTime: "",
-            endTime: ""
+            timeSlots: [],
           });
 
           setActiveTab('restaurants');
@@ -210,7 +243,7 @@ function BusinessDashboard() {
                     <div>
                       <div className="font-bold text-lg">{restaurant.name}</div>
                       <div className="text-sm text-gray-600">{restaurant.address}</div>
-                      <div className="text-sm">{restaurant.introduction}</div>
+                      <div className="text-sm">{restaurant.description}</div>
                       <div className="text-sm">
                         可供預約時間段:
                         {restaurant.timeSlots && restaurant.timeSlots.length > 0 ? (
@@ -267,14 +300,27 @@ function BusinessDashboard() {
                       >
                         <Edit className="mr-2 h-4 w-4" /> 編輯
                       </Button>
-                      <Button 
-                        variant="destructive" 
-                        size="sm" 
-                        onClick={() => handleDeleteRestaurant(restaurant.id)}
-                        className="border border-black rounded-[8px]"
+                      <AlertDialog>
+                      <AlertDialogTrigger
+                        variant="destructive"
+                        size="sm"
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 rounded-[8px]"
                       >
                         <Trash2 className="mr-2 h-4 w-4" /> 刪除
-                      </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className="bg-white">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>刪除餐廳</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            此操作將永久刪除您的餐廳資料，確定要繼續嗎?
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                        <AlertDialogAction className="bg-blue-500 text-white font-bold shadow-md hover:bg-blue-600 rounded-[8px]" onClick={()=> handleDeleteRestaurant(restaurant.id)}>繼續</AlertDialogAction>
+                          <AlertDialogAction className="bg-red-500 text-white font-bold shadow-md hover:bg-red-600 rounded-[8px]">取消</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                     </div>
                   </div>
                 ))}
@@ -326,6 +372,21 @@ function BusinessDashboard() {
                       type="number"
                       value={newRestaurant.averageSpending}
                       onChange={(e) => setNewRestaurant(prev => ({ ...prev, averageSpending: e.target.value }))}
+                    />
+                  </div>
+
+                  {/* 餐廳標籤 */}
+                  <div>
+                    <Label>餐廳標籤</Label>
+                    <Input
+                      placeholder="請輸入標籤（以半形逗號分隔）"
+                      value={newRestaurant.tags.join(", ")}
+                      onChange={(e) =>
+                        setNewRestaurant(prev => ({
+                          ...prev,
+                          tags: e.target.value.split(",").map(tag => tag.trim())
+                        }))
+                      }
                     />
                   </div>
         
@@ -391,7 +452,6 @@ function BusinessDashboard() {
                     新增時間段
                   </Button>
                   </div>
-
                   
                   <div className="mt-4">
                     <Label>已新增的時間段</Label>
@@ -419,21 +479,7 @@ function BusinessDashboard() {
                       ))}
                     </div>
                   </div>
-                  {/* 餐廳標籤 */}
-                  <div>
-                    <Label>餐廳標籤</Label>
-                    <Input
-                      placeholder="請輸入標籤（以半形逗號分隔）"
-                      value={newRestaurant.tags.join(", ")}
-                      onChange={(e) =>
-                        setNewRestaurant(prev => ({
-                          ...prev,
-                          tags: e.target.value.split(",").map(tag => tag.trim())
-                        }))
-                      }
-                    />
-                  </div>
-        
+
                   <div>
                     <Label>餐廳圖片</Label>
                     <div className="border-2 border-gray-200 rounded-lg p-4 bg-gray-50">
@@ -578,11 +624,11 @@ function BusinessDashboard() {
   
     return (
       <Dialog open={!!selectedRestaurant} onOpenChange={() => setSelectedRestaurant(null)}>
-        <DialogContent className="bg-white max-w-3xl">
+        <DialogContent className="bg-white max-w-3xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>編輯餐廳</DialogTitle>
           </DialogHeader>
-          <div className="space-y-6">
+          <div key={selectedRestaurant.id} className="overflow-y-auto pr-4 max-h-[calc(90vh-8rem)]">
             {/* 基本資訊 */}
             <div>
               <Label>餐廳名稱</Label>
@@ -601,11 +647,31 @@ function BusinessDashboard() {
             <div>
               <Label>餐廳介紹</Label>
               <Textarea 
-                value={selectedRestaurant.introduction}
-                onChange={(e) => setSelectedRestaurant(prev => ({ ...prev, introduction: e.target.value }))}
+                value={selectedRestaurant.description}
+                onChange={(e) => setSelectedRestaurant(prev => ({ ...prev, description: e.target.value }))}
               />
             </div>
-  
+            <div>
+              <Label>平均消費金額</Label>
+              <Input
+                type="number"
+                value={selectedRestaurant.averageSpending}
+                onChange={(e) => setSelectedRestaurant(prev => ({ ...prev, averageSpending: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label>餐廳標籤</Label>
+              <Input
+                placeholder="請輸入標籤（以半形逗號分隔）"
+                value={selectedRestaurant.tags.join(", ")}
+                onChange={(e) =>
+                  setSelectedRestaurant(prev => ({
+                    ...prev,
+                    tags: e.target.value.split(",").map(tag => tag.trim())
+                  }))
+                }
+              />
+            </div>
             {/* 時間段管理 */}
             <div>
               <Label>可預約時間段</Label>
@@ -661,17 +727,19 @@ function BusinessDashboard() {
                     </Button>
                   </div>
                 ))}
-              </div>
+              </div >
+              <div className="text-right">
               <Button 
                 variant="outline" 
-                className="mt-2"
+                className="bg-blue-500 text-white font-bold hover:bg-blue-600 rounded-[8px] mt-2 mb-2"
                 onClick={() => {
                   const newSlot = { startDate: "", endDate: "", startTime: "", endTime: "" };
                   setSelectedRestaurant(prev => ({ ...prev, timeSlots: [...prev.timeSlots, newSlot] }));
                 }}
               >
-                新增時間段
+                新增時間
               </Button>
+              </div>
             </div>
   
             {/* 圖片管理 */}
@@ -723,8 +791,11 @@ function BusinessDashboard() {
             {/* 確定保存按鈕 */}
             <div className="text-right">
               <Button 
-                onClick={handleSaveRestaurant} 
-                className="bg-blue-500 text-white font-bold shadow-md hover:bg-blue-600 rounded-[8px]"
+                onClick={() => {
+                  handleSaveRestaurant(selectedRestaurant.id, selectedRestaurant);  // 呼叫 handleSaveRestaurant 函數
+                  console.log('輸出結果: ' + JSON.stringify(selectedRestaurant));  // 輸出 selectedRestaurant 到控制台
+                }} 
+                className="bg-blue-500 text-white font-bold hover:bg-blue-600 rounded-[8px] mt-2 mb-2"
               >
                 儲存變更
               </Button>

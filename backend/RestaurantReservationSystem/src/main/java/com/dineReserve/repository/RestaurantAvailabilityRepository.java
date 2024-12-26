@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.dineReserve.model.entity.RestaurantAvailability;
+import com.dineReserve.model.entity.RestaurantTag;
 
 @Repository
 public interface RestaurantAvailabilityRepository extends JpaRepository<RestaurantAvailability, Long>{
@@ -40,4 +41,7 @@ public interface RestaurantAvailabilityRepository extends JpaRepository<Restaura
         Long excludeId
     );
 	
+    // 基於餐廳 ID 刪除標籤
+    void deleteByRestaurantId(Long restaurantId);
+    
 }

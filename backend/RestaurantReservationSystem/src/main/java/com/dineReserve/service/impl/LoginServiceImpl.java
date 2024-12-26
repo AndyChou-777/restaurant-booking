@@ -19,11 +19,13 @@ import com.dineReserve.service.LoginService;
 import com.dineReserve.util.PasswordUtil;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 
 /**
  * 處理用戶登入的服務。
  */
 @Service
+@Transactional
 public class LoginServiceImpl implements LoginService{
 
     @Autowired

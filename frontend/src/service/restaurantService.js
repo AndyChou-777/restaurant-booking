@@ -78,3 +78,42 @@ export const searchRestaurants = async (searchData = {}) => {
 
   return response.json();
 };
+
+
+// 獲取所有餐廳
+export const getAllRestaurants = async () => {
+  const url = API_BASE_URL;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || '餐廳加載失敗');
+  }
+
+  return response.json();
+};
+
+// 獲取旗下餐廳
+export const fetchRestaurants = async () => {
+  const url = `${API_BASE_URL}/search`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || '餐廳加載失敗');
+  }
+
+  return response.json();
+};

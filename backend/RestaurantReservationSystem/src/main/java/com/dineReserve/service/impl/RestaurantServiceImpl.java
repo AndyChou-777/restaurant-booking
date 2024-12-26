@@ -20,6 +20,7 @@ import com.dineReserve.model.dto.ReservationDTO;
 import com.dineReserve.model.dto.AvailabilityDTO;
 import com.dineReserve.model.dto.RestaurantDTO;
 import com.dineReserve.model.dto.RestaurantSearchDTO;
+import com.dineReserve.model.dto.TimeSlotDTO;
 import com.dineReserve.model.entity.Reservation;
 import com.dineReserve.model.entity.Restaurant;
 import com.dineReserve.model.entity.RestaurantAvailability;
@@ -83,15 +84,16 @@ public class RestaurantServiceImpl implements RestaurantService {
         Restaurant savedRestaurant = restaurantRepository.save(restaurant);
         System.out.println("餐廳保存完成，ID: " + savedRestaurant.getId());
 
-        // 4. 創建並保存可用時間
-        RestaurantAvailability availability = new RestaurantAvailability();
-        availability.setRestaurant(savedRestaurant);
-        availability.setStartDate(dto.getStartDate());
-        availability.setEndDate(dto.getEndDate());
-        availability.setStartTime(dto.getStartTime());
-        availability.setEndTime(dto.getEndTime());
-        availabilityRepository.save(availability);
-        System.out.println("可用時間保存完成: " + availability);
+        // 2. 保存時間段
+        for (TimeSlotDTO timeSlot : dto.getTimeSlots()) {
+            RestaurantAvailability availability = new RestaurantAvailability();
+            availability.setRestaurant(savedRestaurant);
+            availability.setStartDate(timeSlot.getStartDate());
+            availability.setEndDate(timeSlot.getEndDate());
+            availability.setStartTime(timeSlot.getStartTime());
+            availability.setEndTime(timeSlot.getEndTime());
+            availabilityRepository.save(availability);
+        }
         
         // 5. 創建並保存標籤
         if (dto.getTags() != null && !dto.getTags().isEmpty()) {
@@ -141,8 +143,11 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     public void deleteRestaurant(Long id) {
         Restaurant restaurant = restaurantRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
+            .orElseThrow(() -> new ResourceNotFoundException());
         restaurantRepository.delete(restaurant);
+        
+        List<RestaurantTag> restaurantTags = restaurantTagRepository.findByRestaurantId(id);
+        
     }
 
     @Override
@@ -174,6 +179,47 @@ public class RestaurantServiceImpl implements RestaurantService {
         return restaurantRepository.findAll().stream()
                 .map(restaurant -> modelMapper.map(restaurant, RestaurantDTO.class))
                 .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<RestaurantDTO> getRestaurantsById(Long id) {
+        return restaurantRepository.findByOwnerId(id).stream()
+            .map(restaurant -> {
+                RestaurantDTO dto = new RestaurantDTO();
+                dto.setId(restaurant.getId());
+                dto.setName(restaurant.getName());
+                dto.setAddress(restaurant.getAddress());
+                dto.setDescription(restaurant.getDescription());
+                dto.setAverageSpending(restaurant.getAverageSpending());
+
+                // 處理標籤
+                List<String> tags = restaurant.getTags().stream()
+                    .map(RestaurantTag::getTag)
+                    .collect(Collectors.toList());
+                dto.setTags(tags);
+
+                // 處理圖片
+                List<String> images = restaurant.getImages().stream()
+                    .map(RestaurantImage::getImageBase64)
+                    .collect(Collectors.toList());
+                dto.setImageBase64List(images);
+
+                // 處理營業時間段
+                List<TimeSlotDTO> timeSlots = restaurant.getAvailabilities().stream()
+                    .map(availability -> {
+                        TimeSlotDTO timeSlot = new TimeSlotDTO();
+                        timeSlot.setStartDate(availability.getStartDate());
+                        timeSlot.setEndDate(availability.getEndDate());
+                        timeSlot.setStartTime(availability.getStartTime());
+                        timeSlot.setEndTime(availability.getEndTime());
+                        return timeSlot;
+                    })
+                    .collect(Collectors.toList());
+                dto.setTimeSlots(timeSlots);
+
+                return dto;
+            })
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -349,3 +395,4 @@ public class RestaurantServiceImpl implements RestaurantService {
         return !time.isBefore(start) && !time.isAfter(end);
     }
 }
+

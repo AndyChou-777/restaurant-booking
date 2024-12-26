@@ -48,18 +48,8 @@ public class RestaurantDTO {
     @Size(max = 5, message = "標籤數量不可超過5個")
     private List<String> tags;
     
-    @NotNull(message = "開始日期不能為空")
-    @PastOrPresent(message = "開始日期不能為未來日期")
-    private LocalDate startDate;
-    
-    @NotNull(message = "結束日期不能為空")
-    @FutureOrPresent(message = "結束日期不能為過去日期")
-    private LocalDate endDate;
-    
-    @NotNull(message = "開始時間不能為空")
-    private LocalTime startTime;
-    
-    @NotNull(message = "結束時間不能為空")
-    private LocalTime endTime;
+    @NotNull(message = "時間段不能為空")
+    @Size(min = 1, message = "至少需要有一個時間段")
+    private List<TimeSlotDTO> timeSlots;
     
 }

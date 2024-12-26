@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import com.dineReserve.model.entity.Reservation;
 import com.dineReserve.model.entity.Restaurant;
 
 @Repository
@@ -21,4 +22,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long>{
     @Query("SELECT DISTINCT r FROM Restaurant r JOIN r.tags t WHERE t.tag IN :tags")
     List<Restaurant> findByTags(List<String> tags);
 	
+    // 根據 id 搜索旗下餐廳
+    List<Restaurant> findByOwnerId(Long userId);
+    
 }

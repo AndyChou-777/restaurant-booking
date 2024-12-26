@@ -38,38 +38,23 @@ import {
   searchRestaurants 
 } from "@/service/restaurantService"
 import { X } from "lucide-react"
+import { fetchRestaurants } from "@/service/restaurantService"
 
 function BusinessDashboard() {
-  const [activeTab, setActiveTab] = useState("restaurants")
-  const [restaurants, setRestaurants] = useState([
-    {
-      id: "1",
-      name: "餐廳A",
-      address: "台北市信義區",
-      introduction: "美味的地方",
-      hours: {
-        morning: "07:00-11:00",
-        evening: "17:00-22:00"
-      },
-      reservationDates: []
-    },
-    {
-      id: "2", 
-      name: "餐廳B", 
-      address: "台北市大安區",
-      introduction: "精緻料理",
-      hours: {
-        morning: "08:00-12:00",
-        evening: "18:00-23:00"
-      },
-      reservationDates: []
-    }
-  ])
+  const [activeTab, setActiveTab] = useState("restaurants");
+  const [restaurants, setRestaurants] = useState([]);
   const [accountInfo, setAccountInfo] = useState({
     username: "business_user",
     email: "business@example.com",
     phone: "0912345678"
   })
+  const [timeSlot, setTimeSlot] = useState({
+    startDate: "",
+    endDate: "",
+    startTime: "",
+    endTime: "",
+  });
+  const [timeSlots, setTimeSlots] = useState([]);
   const [newRestaurant, setNewRestaurant] = useState({
     name: "", // 餐廳名稱
     address: "", // 餐廳地址
@@ -77,14 +62,10 @@ function BusinessDashboard() {
     averageSpending: "", // 平均消費金額
     imageBase64List: [], // 圖片的 Base64 編碼列表
     tags: [], // 餐廳標籤
-    startDate: "", // 開始日期 (YYYY-MM-DD)
-    endDate: "", // 結束日期 (YYYY-MM-DD)
-    startTime: "", // 營業開始時間 (HH:mm)
-    endTime: "" // 營業結束時間 (HH:mm)
+    timeSlots: [], // 可預約的多個時間段 (每個元素包含 startDate, endDate, startTime, endTime)
   });
 
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
-  const [selectedDates, setSelectedDates] = useState([]);
   const [showAlert, setShowAlert] = useState(false);
   const [alertTitle, setAlertTitle] = useState(null);
   const [alertDescription, setAlertDescription] = useState(null);
@@ -112,6 +93,42 @@ function BusinessDashboard() {
   
       checkLoginStatus();
     }, []);
+
+    useEffect(() => {
+      const loadRestaurants = async () => {
+        try {
+          const apiResponse = await fetchRestaurants();
+          if (apiResponse.message === '旗下餐廳獲取成功') {
+            setRestaurants(apiResponse.data.map(restaurant => ({
+              id: restaurant.id,
+              name: restaurant.name,
+              address: restaurant.address,
+              introduction: restaurant.description,
+              averageSpending: restaurant.averageSpending,
+              timeSlots: restaurant.timeSlots && restaurant.timeSlots.length > 0
+                ? restaurant.timeSlots.map(slot => ({
+                    startDate: slot.startDate,
+                    endDate: slot.endDate,
+                    startTime: slot.startTime,
+                    endTime: slot.endTime
+                  }))
+                : [], // 沒有時間段時設置為空陣列
+              tags: restaurant.tags,
+              imageBase64List: restaurant.imageBase64List
+            })));
+    
+            console.log(apiResponse);
+          }
+        } catch (error) {
+          console.error("無法加載餐廳資料:", error);
+          showTemporaryAlert('錯誤', '無法加載餐廳資料');
+        }
+      };
+    
+      if (activeTab === "restaurants") {
+        loadRestaurants();
+      }
+    }, [activeTab]);
 
   const showTemporaryAlert = (title, description) => {
     
@@ -195,8 +212,51 @@ function BusinessDashboard() {
                       <div className="text-sm text-gray-600">{restaurant.address}</div>
                       <div className="text-sm">{restaurant.introduction}</div>
                       <div className="text-sm">
-                        早班: {restaurant.hours.morning} | 晚班: {restaurant.hours.evening}
+                        可供預約時間段:
+                        {restaurant.timeSlots && restaurant.timeSlots.length > 0 ? (
+                          <div className="mt-2 space-y-1">
+                            {restaurant.timeSlots.map((slot, index) => (
+                              <div
+                                key={index}
+                                className="ml-2 text-white bg-blue-400 text-xs px-2 py-1 rounded inline-block"
+                              >
+                                {slot.startDate} 至 {slot.endDate} | {slot.startTime} ~ {slot.endTime} 
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="ml-2 text-gray-500">無可用時間段</span>
+                        )}
                       </div>
+                      <div className="text-sm">
+                        平均消費: ${restaurant.averageSpending}
+                      </div>
+                      {restaurant.tags && restaurant.tags.length > 0 && (
+                        <div className="flex gap-2 mt-2">
+                          {restaurant.tags.map((tag, index) => (
+                            <span key={index} className="bg-gray-100 text-xs px-2 py-1 rounded">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {restaurant.imageBase64List && restaurant.imageBase64List.length > 0 && (
+                        <div className="flex gap-2 mt-2">
+                          {restaurant.imageBase64List.slice(0, 2).map((image, index) => (
+                            <img 
+                              key={index}
+                              src={image}
+                              alt={`${restaurant.name}-${index}`}
+                              className="w-16 h-16 object-cover rounded"
+                            />
+                          ))}
+                          {restaurant.imageBase64List.length > 2 && (
+                            <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
+                              +{restaurant.imageBase64List.length - 2}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <div className="flex space-x-2">
                       <Button 
@@ -269,51 +329,101 @@ function BusinessDashboard() {
                     />
                   </div>
         
-                  {/* 營業日期 */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>開始日期</Label>
-                      <Input
-                        type="date"
-                        value={newRestaurant.startDate}
-                        onChange={(e) => setNewRestaurant(prev => ({ ...prev, startDate: e.target.value }))}
-                      />
+                  {/* 時間段輸入區域 */}
+                  <div>
+                    <Label>新增可預約時間段</Label>
+                    <div className="grid grid-cols-2 gap-4 mt-2">
+                      <div>
+                        <Label>開始日期</Label>
+                        <Input
+                          type="date"
+                          value={timeSlot.startDate}
+                          onChange={(e) => setTimeSlot({ ...timeSlot, startDate: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label>結束日期</Label>
+                        <Input
+                          type="date"
+                          value={timeSlot.endDate}
+                          onChange={(e) => setTimeSlot({ ...timeSlot, endDate: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label>開始時間</Label>
+                        <Input
+                          type="time"
+                          value={timeSlot.startTime}
+                          onChange={(e) => setTimeSlot({ ...timeSlot, startTime: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label>結束時間</Label>
+                        <Input
+                          type="time"
+                          value={timeSlot.endTime}
+                          onChange={(e) => setTimeSlot({ ...timeSlot, endTime: e.target.value })}
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <Label>結束日期</Label>
-                      <Input
-                        type="date"
-                        value={newRestaurant.endDate}
-                        onChange={(e) => setNewRestaurant(prev => ({ ...prev, endDate: e.target.value }))}
-                      />
+                    
+                    <Button
+                      onClick={() => {
+                        if (
+                          timeSlot.startDate &&
+                          timeSlot.endDate &&
+                          timeSlot.startTime &&
+                          timeSlot.endTime
+                        ) {
+                          // 將新時間段加入到 newRestaurant 的 timeSlots 中
+                          setNewRestaurant(prev => ({
+                            ...prev,
+                            timeSlots: [...prev.timeSlots, timeSlot],
+                          }));
+                          // 清空 timeSlot 輸入欄位
+                          setTimeSlot({ startDate: "", endDate: "", startTime: "", endTime: "" });
+                        } else {
+                          alert("請完整填寫時間段！");
+                        }
+                      }}
+                      className="mt-2"
+                    >
+                    新增時間段
+                  </Button>
+                  </div>
+
+                  
+                  <div className="mt-4">
+                    <Label>已新增的時間段</Label>
+                    <div className="space-y-2">
+                      {newRestaurant.timeSlots.map((slot, index) => (
+                        <div
+                          key={index}
+                          className="flex justify-between items-center border p-2 rounded bg-gray-50"
+                        >
+                          <div>
+                            {slot.startDate} 至 {slot.endDate} | {slot.startTime} ~ {slot.endTime}
+                          </div>
+                          <button
+                            onClick={() =>
+                              setNewRestaurant(prev => ({
+                                ...prev,
+                                timeSlots: prev.timeSlots.filter((_, i) => i !== index),
+                              }))
+                            }
+                            className="text-red-500 hover:underline"
+                          >
+                            刪除
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   </div>
-        
-                  {/* 營業時間 */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>營業開始時間</Label>
-                      <Input
-                        type="time"
-                        value={newRestaurant.startTime}
-                        onChange={(e) => setNewRestaurant(prev => ({ ...prev, startTime: e.target.value }))}
-                      />
-                    </div>
-                    <div>
-                      <Label>營業結束時間</Label>
-                      <Input
-                        type="time"
-                        value={newRestaurant.endTime}
-                        onChange={(e) => setNewRestaurant(prev => ({ ...prev, endTime: e.target.value }))}
-                      />
-                    </div>
-                  </div>
-        
                   {/* 餐廳標籤 */}
                   <div>
                     <Label>餐廳標籤</Label>
                     <Input
-                      placeholder="請輸入標籤（以逗號分隔）"
+                      placeholder="請輸入標籤（以半形逗號分隔）"
                       value={newRestaurant.tags.join(", ")}
                       onChange={(e) =>
                         setNewRestaurant(prev => ({
@@ -404,11 +514,14 @@ function BusinessDashboard() {
         
                   {/* 提交按鈕 */}
                   <Button
-                    onClick={handleCreateNewRestaurant}
+                    onClick={() => {
+                      console.log("要送出的資料:", newRestaurant); // 檢查資料格式
+                      handleCreateNewRestaurant(newRestaurant); // 傳遞資料給處理函數
+                    }}
                     className="border border-black rounded-[8px]"
                   >
                     <PlusCircle className="mr-2 h-4 w-4" /> 建立餐廳
-                  </Button>
+                </Button>
                 </div>
               </CardContent>
             </Card>
@@ -461,63 +574,161 @@ function BusinessDashboard() {
 
   // 編輯餐廳的彈出視窗
   const renderEditRestaurantModal = () => {
-    if (!selectedRestaurant) return null
-
+    if (!selectedRestaurant) return null;
+  
     return (
       <Dialog open={!!selectedRestaurant} onOpenChange={() => setSelectedRestaurant(null)}>
-        <DialogContent className="bg-white">
+        <DialogContent className="bg-white max-w-3xl">
           <DialogHeader>
             <DialogTitle>編輯餐廳</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-6">
+            {/* 基本資訊 */}
             <div>
               <Label>餐廳名稱</Label>
               <Input 
                 value={selectedRestaurant.name}
-                onChange={(e) => setSelectedRestaurant(prev => ({...prev, name: e.target.value}))}
+                onChange={(e) => setSelectedRestaurant(prev => ({ ...prev, name: e.target.value }))}
               />
             </div>
             <div>
               <Label>餐廳地址</Label>
               <Input 
                 value={selectedRestaurant.address}
-                onChange={(e) => setSelectedRestaurant(prev => ({...prev, address: e.target.value}))}
+                onChange={(e) => setSelectedRestaurant(prev => ({ ...prev, address: e.target.value }))}
               />
             </div>
             <div>
               <Label>餐廳介紹</Label>
               <Textarea 
                 value={selectedRestaurant.introduction}
-                onChange={(e) => setSelectedRestaurant(prev => ({...prev, introduction: e.target.value}))}
+                onChange={(e) => setSelectedRestaurant(prev => ({ ...prev, introduction: e.target.value }))}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>早班營業時間</Label>
-                <Input 
-                  value={selectedRestaurant.hours.morning}
-                  onChange={(e) => setSelectedRestaurant(prev => ({
-                    ...prev, 
-                    hours: {...prev.hours, morning: e.target.value}
-                  }))}
-                />
+  
+            {/* 時間段管理 */}
+            <div>
+              <Label>可預約時間段</Label>
+              <div className="space-y-4">
+                {selectedRestaurant.timeSlots.map((slot, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <Input 
+                      type="date"
+                      value={slot.startDate}
+                      onChange={(e) => {
+                        const updatedHours = [...selectedRestaurant.timeSlots];
+                        updatedHours[index].startDate = e.target.value;
+                        setSelectedRestaurant(prev => ({ ...prev, timeSlots: updatedHours }));
+                      }}
+                    />
+                    <Input 
+                      type="date"
+                      value={slot.endDate}
+                      onChange={(e) => {
+                        const updatedHours = [...selectedRestaurant.timeSlots];
+                        updatedHours[index].endDate = e.target.value;
+                        setSelectedRestaurant(prev => ({ ...prev, timeSlots: updatedHours }));
+                      }}
+                    />
+                    <Input 
+                      type="time"
+                      value={slot.startTime}
+                      onChange={(e) => {
+                        const updatedHours = [...selectedRestaurant.timeSlots];
+                        updatedHours[index].startTime = e.target.value;
+                        setSelectedRestaurant(prev => ({ ...prev, timeSlots: updatedHours }));
+                      }}
+                    />
+                    <Input 
+                      type="time"
+                      value={slot.endTime}
+                      onChange={(e) => {
+                        const updatedHours = [...selectedRestaurant.timeSlots];
+                        updatedHours[index].endTime = e.target.value;
+                        setSelectedRestaurant(prev => ({ ...prev, timeSlots: updatedHours }));
+                      }}
+                    />
+                    <Button 
+                      variant="ghost"
+                      size="xs"
+                      className=" -top-2 -right-2 bg-blue-500 hover:bg-blue-500 text-white rounded-full p-1 shadow-lg transition-colors"
+                      onClick={() => {
+                        const updatedHours = selectedRestaurant.timeSlots.filter((_, i) => i !== index);
+                        setSelectedRestaurant(prev => ({ ...prev, timeSlots: updatedHours }));
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
               </div>
-              <div>
-                <Label>晚班營業時間</Label>
-                <Input 
-                  value={selectedRestaurant.hours.evening}
-                  onChange={(e) => setSelectedRestaurant(prev => ({
-                    ...prev, 
-                    hours: {...prev.hours, evening: e.target.value}
-                  }))}
-                />
-              </div>
+              <Button 
+                variant="outline" 
+                className="mt-2"
+                onClick={() => {
+                  const newSlot = { startDate: "", endDate: "", startTime: "", endTime: "" };
+                  setSelectedRestaurant(prev => ({ ...prev, timeSlots: [...prev.timeSlots, newSlot] }));
+                }}
+              >
+                新增時間段
+              </Button>
             </div>
-              <Button onClick={handleSaveRestaurant}
-                      className="bg-blue-500 text-white font-bold shadow-md hover:bg-blue-600 rounded-[8px]"
+  
+            {/* 圖片管理 */}
+          <div>
+            <Label>圖片</Label>
+            <div className="flex flex-wrap gap-4">
+              {selectedRestaurant.imageBase64List.map((image, index) => (
+                <div key={index} className="relative">
+                  <img 
+                    src={image} 
+                    alt={`餐廳圖片-${index}`} 
+                    className="w-24 h-24 object-cover rounded shadow"
+                  />
+                  <Button 
+                    variant="ghost" 
+                    size="xs" 
+                    className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-lg transition-colors"
+                    onClick={() => {
+                      const updatedImages = selectedRestaurant.imageBase64List.filter((_, i) => i !== index);
+                      setSelectedRestaurant(prev => ({ ...prev, imageBase64List: updatedImages }));
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4">
+              <Input 
+                type="file" 
+                accept="image/*" 
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setSelectedRestaurant(prev => ({
+                        ...prev,
+                        imageBase64List: [...prev.imageBase64List, reader.result],
+                      }));
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
+            </div>
+          </div>
+  
+            {/* 確定保存按鈕 */}
+            <div className="text-right">
+              <Button 
+                onClick={handleSaveRestaurant} 
+                className="bg-blue-500 text-white font-bold shadow-md hover:bg-blue-600 rounded-[8px]"
               >
                 儲存變更
               </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

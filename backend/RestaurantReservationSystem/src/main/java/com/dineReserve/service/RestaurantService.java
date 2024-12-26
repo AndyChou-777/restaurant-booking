@@ -3,6 +3,7 @@ package com.dineReserve.service;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import com.dineReserve.model.dto.ReservationDTO;
 import com.dineReserve.model.dto.AvailabilityDTO;
@@ -19,7 +20,8 @@ public interface RestaurantService {
     
     // 搜索功能
     List<RestaurantDTO> searchRestaurants(RestaurantSearchDTO searchDTO);
-    List<RestaurantDTO> getAllRestaurants();
+    List<RestaurantDTO> getAllRestaurants(); // 取得所有餐廳
+    List<RestaurantDTO> getRestaurantsById(Long id); // 根據 id 取得旗下餐廳 (用於企業用戶)
     
     // 預約管理
     ReservationDTO createReservation(ReservationDTO reservationDTO);

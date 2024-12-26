@@ -12,7 +12,10 @@ import com.dineReserve.repository.UserRepository;
 import com.dineReserve.service.RegistrationService;
 import com.dineReserve.util.Hash;
 
+import jakarta.transaction.Transactional;
+
 @Service
+@Transactional
 public class RegistrationServiceImpl implements RegistrationService {
 
 	@Autowired

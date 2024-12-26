@@ -56,14 +56,14 @@ public class RestaurantController {
     		@PathVariable Long id,
     		@Valid @RequestBody RestaurantDTO restaurantDTO) {
         RestaurantDTO updatedRestaurant = restaurantService.updateRestaurant(id, restaurantDTO);
-        return ResponseEntity.ok(ApiResponse.success("餐廳更新成功!", updatedRestaurant));
+        return ResponseEntity.ok(ApiResponse.success("餐廳更新成功", updatedRestaurant));
     }
 
     @DeleteMapping("/restaurants/{id}")
     @CheckUserSession
     public ResponseEntity<ApiResponse<Void>> deleteRestaurant(@PathVariable Long id) {
         restaurantService.deleteRestaurant(id);
-        return ResponseEntity.ok(ApiResponse.success("餐廳刪除成功!", null));
+        return ResponseEntity.ok(ApiResponse.success("餐廳刪除成功", null));
     }
 
     @PostMapping
@@ -74,7 +74,26 @@ public class RestaurantController {
             searchDTO = new RestaurantSearchDTO();
         }
         List<RestaurantDTO> restaurants = restaurantService.searchRestaurants(searchDTO);
-        return ResponseEntity.ok(ApiResponse.success("餐廳搜索成功!", restaurants));
+        return ResponseEntity.ok(ApiResponse.success("餐廳搜索成功", restaurants));
+    }
+    
+    @GetMapping
+    @CheckUserSession
+    public ResponseEntity<ApiResponse<List<RestaurantDTO>>> findAllRestuarants(){
+    	List<RestaurantDTO> restaurantDTO = restaurantService.getAllRestaurants();
+    	return ResponseEntity.ok(ApiResponse.success("餐廳獲取成功", restaurantDTO));
+    }
+    
+    @GetMapping("/search")
+    @CheckUserSession
+    public ResponseEntity<ApiResponse<List<RestaurantDTO>>> findRestuarantsById(HttpSession session){
+    	
+    	LoginResponseDTO loginResponseDTO = (LoginResponseDTO) session.getAttribute("loginDTO");
+    	Long id = loginResponseDTO.getId();
+    	List<RestaurantDTO> restaurantDTO = restaurantService.getRestaurantsById(id);
+    	System.out.println(restaurantDTO);
+    	return ResponseEntity.ok(ApiResponse.success("旗下餐廳獲取成功", restaurantDTO));
+    	
     }
     
 }

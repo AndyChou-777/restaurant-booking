@@ -209,7 +209,41 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     public List<RestaurantDTO> getAllRestaurants() {
         return restaurantRepository.findAll().stream()
-                .map(restaurant -> modelMapper.map(restaurant, RestaurantDTO.class))
+        		.map(restaurant -> {
+                    RestaurantDTO dto = new RestaurantDTO();
+                    dto.setId(restaurant.getId());
+                    dto.setName(restaurant.getName());
+                    dto.setAddress(restaurant.getAddress());
+                    dto.setDescription(restaurant.getDescription());
+                    dto.setAverageSpending(restaurant.getAverageSpending());
+
+                    // 處理標籤
+                    List<String> tags = restaurant.getTags().stream()
+                        .map(RestaurantTag::getTag)
+                        .collect(Collectors.toList());
+                    dto.setTags(tags);
+
+                    // 處理圖片
+                    List<String> images = restaurant.getImages().stream()
+                        .map(RestaurantImage::getImageBase64)
+                        .collect(Collectors.toList());
+                    dto.setImageBase64List(images);
+
+                    // 處理預約時間段
+                    List<TimeSlotDTO> timeSlots = restaurant.getAvailabilities().stream()
+                        .map(availability -> {
+                            TimeSlotDTO timeSlot = new TimeSlotDTO();
+                            timeSlot.setStartDate(availability.getStartDate());
+                            timeSlot.setEndDate(availability.getEndDate());
+                            timeSlot.setStartTime(availability.getStartTime());
+                            timeSlot.setEndTime(availability.getEndTime());
+                            return timeSlot;
+                        })
+                        .collect(Collectors.toList());
+                    dto.setTimeSlots(timeSlots);
+
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
     
@@ -236,7 +270,7 @@ public class RestaurantServiceImpl implements RestaurantService {
                     .collect(Collectors.toList());
                 dto.setImageBase64List(images);
 
-                // 處理營業時間段
+                // 處理預約時間段
                 List<TimeSlotDTO> timeSlots = restaurant.getAvailabilities().stream()
                     .map(availability -> {
                         TimeSlotDTO timeSlot = new TimeSlotDTO();
@@ -400,6 +434,8 @@ public class RestaurantServiceImpl implements RestaurantService {
             .collect(Collectors.toList());
     }
 
+    
+    // 獲取當天可預約時間段
     @Override
     public List<AvailabilityDTO> getAvailability(Long restaurantId, LocalDate date) {
         return availabilityRepository.findByRestaurantIdAndDate(restaurantId, date)
@@ -426,5 +462,6 @@ public class RestaurantServiceImpl implements RestaurantService {
     private boolean isTimeInRange(LocalTime time, LocalTime start, LocalTime end) {
         return !time.isBefore(start) && !time.isAfter(end);
     }
+
 }
 

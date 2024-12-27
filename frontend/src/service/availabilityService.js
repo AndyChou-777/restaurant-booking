@@ -18,6 +18,24 @@ export const getAllAvailabilities = async (restaurantId) => {
   return response.json();
 };
 
+// 根據 id 獲得餐廳當日可用時間
+export const fetchAvailabilities = async (restaurantId) => {
+  const url = `${API_BASE_URL}/${restaurantId}/availabilities`;
+  const response = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || '無法獲取可用時間');
+  }
+
+  return response.json();
+};
+
 // 添加可用時間
 export const addAvailability = async (restaurantId, availabilityData) => {
   const url = `${API_BASE_URL}/${restaurantId}/availabilities`;

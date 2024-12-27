@@ -1,5 +1,6 @@
 package com.dineReserve.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +32,21 @@ public class RestaurantAvailabilityController {
     private RestaurantService restaurantService;
 
     @GetMapping
-    @CheckUserSession
     public ResponseEntity<ApiResponse<List<AvailabilityDTO>>> getAllAvailabilities(
             @PathVariable Long restaurantId) {
-        List<AvailabilityDTO> availabilities = restaurantService.getRestaurantAllAvailabilities(restaurantId);
+        
+    	List<AvailabilityDTO> availabilities = restaurantService.getRestaurantAllAvailabilities(restaurantId);
+    	System.out.println("獲得陣列[]: " + availabilities);
+        return ResponseEntity.ok(ApiResponse.success("預約時間讀取成功!", availabilities));
+    }
+
+    @PutMapping
+    public ResponseEntity<ApiResponse<List<AvailabilityDTO>>> getTodayAvailabilities(
+            @PathVariable Long restaurantId) {
+    	
+    	LocalDate date = LocalDate.now();
+        List<AvailabilityDTO> availabilities = restaurantService.getAvailability(restaurantId, date);
+        System.out.println("獲得陣列[]: " + availabilities);
         return ResponseEntity.ok(ApiResponse.success("預約時間讀取成功!", availabilities));
     }
 

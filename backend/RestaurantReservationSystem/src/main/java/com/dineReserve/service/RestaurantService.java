@@ -35,5 +35,5 @@ public interface RestaurantService {
     void deleteAvailability(Long availabilityId);
     List<AvailabilityDTO> getRestaurantAllAvailabilities(Long restaurantId);
     List<AvailabilityDTO> getAvailability(Long restaurantId, LocalDate date);
-	
+    
 }

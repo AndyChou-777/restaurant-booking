@@ -79,9 +79,9 @@ public class RestaurantController {
     }
     
     @GetMapping
-    @CheckUserSession
     public ResponseEntity<ApiResponse<List<RestaurantDTO>>> findAllRestuarants(){
     	List<RestaurantDTO> restaurantDTO = restaurantService.getAllRestaurants();
+    	System.out.println(restaurantDTO);
     	return ResponseEntity.ok(ApiResponse.success("餐廳獲取成功", restaurantDTO));
     }
     

@@ -183,12 +183,16 @@ function BusinessDashboard() {
     if (selectedRestaurant) {
       try {
         const apiResponse = await updateRestaurant(id, restaurantDate);
-        if (apiResponse === '餐廳更新成功') {
-          setRestaurants(prev => 
-            prev.map(r => r.id === selectedRestaurant.id ? selectedRestaurant : r)
-          )
-          setSelectedRestaurant(null)
-          console.log(apiResponse);
+        if (apiResponse.message === '餐廳更新成功') {
+          // 局部更新餐廳列表狀態
+          setRestaurants(prev =>
+            prev.map(r => (r.id === id ? { ...r, ...restaurantDate } : r))
+          );
+  
+          // 清空選擇的餐廳以關閉對話框
+          setSelectedRestaurant(null);
+  
+          // 顯示成功提示
           showTemporaryAlert('修改成功!', '餐廳資料已成功更新');
         }
       } catch (error) {
@@ -196,7 +200,7 @@ function BusinessDashboard() {
         showTemporaryAlert('錯誤', '無法更新餐廳，請稍後再試');
       }
     }
-  }
+  };  
 
   const handleCreateNewRestaurant = async () => {
     try {

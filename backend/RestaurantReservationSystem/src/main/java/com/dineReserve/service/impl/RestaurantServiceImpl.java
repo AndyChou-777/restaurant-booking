@@ -145,21 +145,21 @@ public class RestaurantServiceImpl implements RestaurantService {
         Restaurant savedRestaurant = restaurantRepository.save(restaurant);
 
         // 清空並重新保存關聯的 Tags
-        restaurantTagRepository.deleteByRestaurantId(id);
+        restaurant.getTags().clear();
         List<RestaurantTag> newTags = dto.getTags().stream()
                 .map(tag -> new RestaurantTag(restaurant, tag))
                 .collect(Collectors.toList());
         restaurantTagRepository.saveAll(newTags);
 
         // 清空並重新保存關聯的 Images
-        restaurantImageRepository.deleteByRestaurantId(id);
+        restaurant.getImages().clear();
         List<RestaurantImage> newImages = dto.getImageBase64List().stream()
                 .map(base64 -> new RestaurantImage(restaurant, base64))
                 .collect(Collectors.toList());
         restaurantImageRepository.saveAll(newImages);
 
         // 清空並重新保存可預約時間段
-        availabilityRepository.deleteByRestaurantId(id);
+        restaurant.getAvailabilities().clear();
         List<RestaurantAvailability> newAvailabilities = dto.getTimeSlots().stream()
                 .map(timeSlot -> new RestaurantAvailability(
                         restaurant, 

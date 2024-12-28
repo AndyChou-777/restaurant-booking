@@ -1,9 +1,16 @@
 package com.dineReserve.model.entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+
+import com.dineReserve.enums.Role;
+import com.dineReserve.enums.Statu;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,17 +42,22 @@ public class Reservation {
     @JoinColumn(name = "restaurant_id", nullable = false)
     private Restaurant restaurant;
 
+    /** 預約的日期。 */
+    @Column(nullable = false)
+    private LocalDate reservationDate;
+
     /** 預約的時間。 */
     @Column(nullable = false)
-    private LocalDateTime reservationTime;
+    private LocalTime reservationTime;
 
     /** 預約的人數。 */
     @Column(nullable = false)
     private Integer numberOfPeople;
 
-    /** 預約的狀態，例如「成功」、「取消」。 */
+    /** 預約的狀態。 */
     @Column(nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private Statu status;
 
 	@Override
 	public String toString() {

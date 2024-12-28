@@ -20,6 +20,24 @@ export const createReservation = async (reservationData) => {
   return response.json();
 };
 
+// 獲取選取日期的尚可預約時間
+export const getAvailabilities = async (restaurantId, date) => {
+  const url = `${API_BASE_URL}/${restaurantId}/${date}`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || '無法獲取可用時間');
+  }
+
+  return response.json();
+};
+
 // 更新預約
 export const updateReservation = async (id, reservationData) => {
   const url = `${API_BASE_URL}/reservation/${id}`;

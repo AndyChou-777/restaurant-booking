@@ -1,19 +1,21 @@
 package com.dineReserve.service.impl;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.dineReserve.enums.Statu;
 import com.dineReserve.exception.ResourceNotFoundException;
 import com.dineReserve.exception.UserNotFoundException;
 import com.dineReserve.model.dto.ReservationDTO;
@@ -35,7 +37,6 @@ import com.dineReserve.repository.RestaurantTagRepository;
 import com.dineReserve.repository.UserRepository;
 import com.dineReserve.service.RestaurantService;
 
-import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -289,11 +290,17 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Override
-    public ReservationDTO createReservation(ReservationDTO dto) {
-        validateAvailability(dto.getRestaurantId(), dto.getReservationTime());
+    public ReservationDTO createReservation(Long userId, ReservationDTO dto) {
+        validateAvailability(dto.getRestaurantId(), dto.getReservationDate(), dto.getReservationTime());
         Reservation reservation = modelMapper.map(dto, Reservation.class);
-        reservation.setStatus("CONFIRMED");
+        
+        Optional<User> user = userRepository.findById(userId);
+        reservation.setUser(user.get());
+        Optional<Restaurant> restaurant = restaurantRepository.findById(dto.getRestaurantId());
+        reservation.setRestaurant(restaurant.get());
+        reservation.setStatus(Statu.CONFIRMED);
         reservation = reservationRepository.save(reservation);
+        System.out.println("建立的預約資料: " + reservation);
         return modelMapper.map(reservation, ReservationDTO.class);
     }
 
@@ -303,7 +310,7 @@ public class RestaurantServiceImpl implements RestaurantService {
             .orElseThrow(() -> new ResourceNotFoundException());
 
         if (!reservation.getReservationTime().equals(dto.getReservationTime())) {
-            validateAvailability(dto.getRestaurantId(), dto.getReservationTime());
+            validateAvailability(dto.getRestaurantId(), dto.getReservationDate(), dto.getReservationTime());
         }
 
         modelMapper.map(dto, reservation);
@@ -315,7 +322,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     public void cancelReservation(Long id) {
         Reservation reservation = reservationRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException());
-        reservation.setStatus("CANCELLED");
+        reservation.setStatus(Statu.CANCELLED);
         reservationRepository.save(reservation);
     }
 
@@ -324,6 +331,59 @@ public class RestaurantServiceImpl implements RestaurantService {
         return reservationRepository.findByUserId(userId).stream()
                 .map(reservation -> modelMapper.map(reservation, ReservationDTO.class))
                 .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<String> getAvailableTimeSlots(Long restaurantId, LocalDate date) {
+        // 1. 獲取餐廳該日期的營業時間範圍
+        List<RestaurantAvailability> availabilities = availabilityRepository.findByRestaurantIdAndDate(
+            restaurantId, 
+            date
+        );
+        
+        if (availabilities.isEmpty()) {
+            return Collections.emptyList();
+        }
+        
+        // 2. 獲取該日期已有的預約
+        List<Reservation> existingReservations = reservationRepository.findByRestaurantIdAndReservationDate(
+            restaurantId, 
+            date
+        );
+        
+        // 3. 生成所有可能的時間段（假設每30分鐘一個時段）
+        Set<LocalTime> allTimeSlots = new TreeSet<>(); // 使用TreeSet自動排序
+        for (RestaurantAvailability availability : availabilities) {
+            LocalTime currentTime = availability.getStartTime();
+            LocalTime endTime = availability.getEndTime();
+            
+            while (currentTime.isBefore(endTime)) {
+                allTimeSlots.add(currentTime);
+                currentTime = currentTime.plusMinutes(30);
+            }
+        }
+        
+        // 4. 移除已被預約的時段
+        for (Reservation reservation : existingReservations) {
+            allTimeSlots.remove(reservation.getReservationTime());
+        }
+        
+        // 5. 如果是當天，移除過去的時段
+        LocalDate today = LocalDate.now();
+        if (date.equals(today)) {
+            LocalTime currentTime = LocalTime.now();
+            allTimeSlots.removeIf(timeSlot -> 
+                timeSlot.isBefore(currentTime)
+            );
+        }
+        
+        // 6. 將 LocalTime 轉換為格式化的字符串
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        List<String> formattedTimeSlots = allTimeSlots.stream()
+            .map(timeSlot -> timeSlot.format(formatter))
+            .collect(Collectors.toList());
+        
+        return formattedTimeSlots;
     }
 
     @Override
@@ -377,10 +437,10 @@ public class RestaurantServiceImpl implements RestaurantService {
         List<Reservation> existingReservations = reservationRepository.findByRestaurantId(dto.getRestaurantId())
             .stream()
             .filter(r -> {
-                LocalDate reservationDate = r.getReservationTime().toLocalDate();
+                LocalDate reservationDate = r.getReservationDate();
                 return !reservationDate.isBefore(dto.getStartDate()) && 
                        !reservationDate.isAfter(dto.getEndDate()) &&
-                       "CONFIRMED".equals(r.getStatus());
+                       "CONFIRMED".equals(r.getStatus().name());
             })
             .collect(Collectors.toList());
 
@@ -406,10 +466,10 @@ public class RestaurantServiceImpl implements RestaurantService {
         List<Reservation> existingReservations = reservationRepository.findByRestaurantId(availability.getRestaurant().getId())
             .stream()
             .filter(r -> {
-                LocalDate reservationDate = r.getReservationTime().toLocalDate();
+                LocalDate reservationDate = r.getReservationDate();
                 return !reservationDate.isBefore(availability.getStartDate()) && 
                        !reservationDate.isAfter(availability.getEndDate()) &&
-                       "CONFIRMED".equals(r.getStatus());
+                       "CONFIRMED".equals(r.getStatus().name());
             })
             .collect(Collectors.toList());
 
@@ -444,18 +504,28 @@ public class RestaurantServiceImpl implements RestaurantService {
             .collect(Collectors.toList());
     }
 
-    private void validateAvailability(Long restaurantId, LocalDateTime reservationTime) {
+    private void validateAvailability(Long restaurantId, LocalDate reservationDate ,LocalTime reservationTime) {
         List<RestaurantAvailability> availabilities = 
             availabilityRepository.findByRestaurantIdAndDate(
                 restaurantId, 
-                reservationTime.toLocalDate()
+                reservationDate
             );
         
         boolean isAvailable = availabilities.stream()
-            .anyMatch(a -> isTimeInRange(reservationTime.toLocalTime(), a.getStartTime(), a.getEndTime()));
+            .anyMatch(a -> isTimeInRange(reservationTime, a.getStartTime(), a.getEndTime()));
+        
+     // 檢查該日期和時間是否已被預約
+        boolean isReserved = reservationRepository
+            .findByReservationDateAndReservationTime(reservationDate, reservationTime)
+            .isPresent();
             
+     // 驗證結果
         if (!isAvailable) {
-            throw new IllegalStateException("所選時間不可預約");
+            throw new IllegalStateException("所選時間不可預約，該時間不在餐廳的可用範圍內");
+        }
+
+        if (isReserved) {
+            throw new IllegalStateException("所選時間已被預約，請選擇其他時間");
         }
     }
 

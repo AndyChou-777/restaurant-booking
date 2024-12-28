@@ -116,36 +116,79 @@ function UserDashboard() {
             </CardContent>
           </Card>
         )
-      case "orders":
-        return (
-          <Card className="bg-white text-black shadow-lg hover:shadow-2xl transition-all duration-300">
-            <CardHeader>
-              <CardTitle>訂單管理</CardTitle>
-              <CardDescription>查看您的歷史訂單</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="border rounded shadow-sm bg-white">
-                <div className="grid grid-cols-4 bg-gray-200 p-2 font-bold border-b text-gray-700">
-                  <div>訂單編號</div>
-                  <div>餐廳</div>
-                  <div>日期</div>
-                  <div>狀態</div>
-                </div>
-                {userData.orders.map((order) => (
-                  <div 
-                    key={order.id} 
-                    className="grid grid-cols-4 p-2 border-b last:border-b-0 hover:bg-gray-100 transition-all duration-200"
-                  >
-                    <div>{order.id}</div>
-                    <div>{order.restaurant}</div>
-                    <div>{order.date}</div>
-                    <div>{order.status}</div>
+        case "orders":
+          return (
+            <Card className="bg-white text-black shadow-lg hover:shadow-2xl transition-all duration-300">
+              <CardHeader>
+                <CardTitle>預約管理</CardTitle>
+                <CardDescription>管理您的餐廳預約記錄</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-lg border bg-white overflow-hidden">
+                  {/* 表頭 */}
+                  <div className="grid grid-cols-7 bg-gray-100 p-3 font-semibold text-gray-700 border-b">
+                    <div className="col-span-1">預約編號</div>
+                    <div className="col-span-1">餐廳名稱</div>
+                    <div className="col-span-1">預約時間</div>
+                    <div className="col-span-2">地址</div>
+                    <div className="col-span-1">狀態</div>
+                    <div className="col-span-1 text-center">操作</div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )
+                  
+                  {/* 預約列表 */}
+                  {userData.orders.map((order) => (
+                    <div 
+                      key={order.id}
+                      className="grid grid-cols-7 p-4 border-b last:border-b-0 hover:bg-gray-50 transition-all duration-200 items-center"
+                    >
+                      <div className="col-span-1 font-medium text-gray-900">
+                        #{order.id}
+                      </div>
+                      <div className="col-span-1 text-gray-800">
+                        {order.restaurant}
+                      </div>
+                      <div className="col-span-1 text-gray-800">
+                        {order.date}
+                      </div>
+                      <div className="col-span-2 text-gray-600">
+                        台北市信義區松仁路100號
+                      </div>
+                      <div className="col-span-1">
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium
+                          ${order.status === '已完成' ? 'bg-green-100 text-green-800' : 
+                            order.status === '待處理' ? 'bg-yellow-100 text-yellow-800' : 
+                            'bg-gray-100 text-gray-800'}`}>
+                          {order.status}
+                        </span>
+                      </div>
+                      <div className="col-span-1 flex justify-center space-x-2">
+                        <Button 
+                          variant="outline"
+                          size="sm"
+                          className="text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
+                          onClick={() => alert(`編輯預約 ${order.id}`)}
+                        >
+                          編輯
+                        </Button>
+                        <Button 
+                          variant="outline"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50"
+                          onClick={() => {
+                            if (window.confirm('確定要取消此預約嗎？')) {
+                              alert(`取消預約 ${order.id}`)
+                            }
+                          }}
+                        >
+                          取消
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )
       case "notifications":
         return (
           <Card className="bg-white text-black shadow-lg hover:shadow-2xl transition-all duration-300">

@@ -36,6 +36,7 @@ export const fetchAvailabilities = async (restaurantId) => {
   return response.json();
 };
 
+
 // 添加可用時間
 export const addAvailability = async (restaurantId, availabilityData) => {
   const url = `${API_BASE_URL}/${restaurantId}/availabilities`;

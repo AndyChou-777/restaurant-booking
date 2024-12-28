@@ -1,5 +1,7 @@
 package com.dineReserve.controller;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dineReserve.aop.CheckUserSession;
+import com.dineReserve.model.dto.LoginResponseDTO;
 import com.dineReserve.model.dto.ReservationDTO;
 import com.dineReserve.response.ApiResponse;
 import com.dineReserve.service.RestaurantService;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
 @RestController
@@ -32,9 +36,23 @@ public class ReservationController {
     @PostMapping
     @CheckUserSession
     public ResponseEntity<ApiResponse<ReservationDTO>> createReservation(
-           @Valid @RequestBody ReservationDTO reservationDTO) {
-        ReservationDTO createdReservation = restaurantService.createReservation(reservationDTO);
-        return ResponseEntity.ok(ApiResponse.success("預約建立成功!", createdReservation));
+    		HttpSession session,
+    		@Valid @RequestBody ReservationDTO reservationDTO) {
+    	LoginResponseDTO responseDTO = (LoginResponseDTO) session.getAttribute("loginDTO");
+    	System.out.print("收到的預約資料: " + reservationDTO);
+        ReservationDTO createdReservation = restaurantService.createReservation(responseDTO.getId(), reservationDTO);
+        System.out.print("返回的建立資料: " + createdReservation);
+        return ResponseEntity.ok(ApiResponse.success("預約建立成功", createdReservation));
+    }
+    
+    @GetMapping("/{restaurantId}/{date}")
+    public ResponseEntity<ApiResponse<List<String>>> getAvailableTimeSlots(
+        @PathVariable Long restaurantId,
+        @PathVariable LocalDate date) {
+    	System.out.print("收到的日期: " + date);
+        List<String> availableTimes = restaurantService.getAvailableTimeSlots(restaurantId, date);
+        System.out.print("返回的時間陣列: " + availableTimes);
+        return ResponseEntity.ok(ApiResponse.success("可用時段獲取成功", availableTimes));
     }
 
     @PutMapping("/reservation/{id}")

@@ -1,6 +1,7 @@
 package com.dineReserve.service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +25,7 @@ public interface RestaurantService {
     List<RestaurantDTO> getRestaurantsById(Long id); // 根據 id 取得旗下餐廳 (用於企業用戶)
     
     // 預約管理
-    ReservationDTO createReservation(ReservationDTO reservationDTO);
+    ReservationDTO createReservation(Long userId, ReservationDTO reservationDTO);
     ReservationDTO updateReservation(Long id, ReservationDTO reservationDTO);
     void cancelReservation(Long id);
     List<ReservationDTO> getUserReservations(Long userId);
@@ -35,5 +36,6 @@ public interface RestaurantService {
     void deleteAvailability(Long availabilityId);
     List<AvailabilityDTO> getRestaurantAllAvailabilities(Long restaurantId);
     List<AvailabilityDTO> getAvailability(Long restaurantId, LocalDate date);
+    List<String> getAvailableTimeSlots(Long restaurantId, LocalDate date);
     
 }

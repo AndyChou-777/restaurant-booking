@@ -7,6 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { getAllRestaurants } from '@/service/restaurantService';
 import { fetchAvailabilities, getAllAvailabilities } from '@/service/availabilityService';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { createReservation, getAvailabilities } from '@/service/reservationService';
 
 function RestaurantBookingApp() {
   const [restaurants, setRestaurants] = useState([]);
@@ -237,6 +238,7 @@ function BookingDialog({ restaurant }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
+  const [numberOfPeople, setNumberOfPeople] = useState(1);
   const [availableDateRanges, setAvailableDateRanges] = useState([]);
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -356,11 +358,17 @@ function BookingDialog({ restaurant }) {
   const getAvailableTimesForDate = async (date) => {
     setIsLoading(true);
     try {
-      const timeRange = getTimeRangeForDate(date);
-      console.log('Time range for selected date:', timeRange);
-      
-      if (timeRange) {
-        const slots = generateTimeSlots(timeRange.startTime, timeRange.endTime);
+      const formattedDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
+      .toISOString()
+      .split('T')[0];
+      const data = await getAvailabilities(restaurant.id, formattedDate);
+
+      if (data.status === 200 && data.data) {
+        // 將回傳的時段轉換為下拉選單需要的格式
+        const slots = data.data.map(time => ({
+          time: time,
+          disabled: false
+        }));
         setAvailableTimeSlots(slots);
       } else {
         setAvailableTimeSlots([]);
@@ -372,23 +380,69 @@ function BookingDialog({ restaurant }) {
     setIsLoading(false);
   };
 
-  const handleBooking = async () => {
+  const handleBooking = async (id, date, time, number) => {
     if (!selectedDate || !selectedTime) return;
-    
     try {
-      const response = await bookRestaurant({
-        restaurantId: restaurant.id,
-        date: selectedDate.toISOString().split('T')[0],
-        time: selectedTime
-      });
+      // 處理日期時區問題
+      const formattedDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
+        .toISOString()
+        .split('T')[0];
+  
+      const reservationData = {
+        restaurantId: id,
+        reservationDate: formattedDate,  // 使用修正後的日期
+        reservationTime: time,
+        numberOfPeople: number,
+      };
+  
+      console.log('Sending reservation data:', reservationData); // 用於調試
+  
+      const apiResponse = await createReservation(reservationData);
       
-      if (response.status === 200) {
+      if (apiResponse.status === 200) {
         setIsOpen(false);
         setShowConfirm(true);
       }
     } catch (error) {
       console.error('預約失敗:', error);
+      // 可以在這裡添加錯誤提示UI
     }
+  };
+
+  // 更新時間選擇的下拉選單部分
+  const renderTimeSelect = () => {
+    if (!selectedDate) return null;
+
+    return (
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium">選擇時段</h3>
+        <Select
+          value={selectedTime}
+          onValueChange={setSelectedTime}
+          disabled={isLoading}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder={isLoading ? "載入中..." : "請選擇時間"} />
+          </SelectTrigger>
+          <SelectContent>
+            {isLoading ? (
+              <SelectItem value="loading">載入中...</SelectItem>
+            ) : availableTimeSlots.length > 0 ? (
+              availableTimeSlots.map(slot => (
+                <SelectItem
+                  key={slot.time}
+                  value={slot.time}
+                >
+                  {slot.time}
+                </SelectItem>
+              ))
+            ) : (
+              <SelectItem value="no-slots">無可用時段</SelectItem>
+            )}
+          </SelectContent>
+        </Select>
+      </div>
+    );
   };
 
   return (
@@ -413,7 +467,10 @@ function BookingDialog({ restaurant }) {
               <Calendar
                 mode="single"
                 selected={selectedDate}
-                onSelect={setSelectedDate}
+                onSelect={(date) => {
+                  setSelectedDate(date);
+                  setSelectedTime(null); // 重置時間選擇
+                }}
                 disabled={(date) => !isDateInRange(date)}
                 className="rounded-lg border border-gray-300"
                 fromDate={new Date()}
@@ -424,35 +481,24 @@ function BookingDialog({ restaurant }) {
               />
             </div>
 
-            {selectedDate && (
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium">選擇時段</h3>
-                <Select
-                  value={selectedTime}
-                  onValueChange={setSelectedTime}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="請選擇時間" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableTimeSlots.map(slot => (
-                      <SelectItem
-                        key={slot.time}
-                        value={slot.time}
-                        disabled={slot.disabled}
-                      >
-                        {slot.time}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            {renderTimeSelect()}
+
+            {/* 人數輸入 */}
+            <div>
+              <h3 className="text-sm font-medium">輸入人數</h3>
+              <Input
+                type="number"
+                value={numberOfPeople}
+                onChange={(e) => setNumberOfPeople(Math.max(1, parseInt(e.target.value) || 1))}
+                min={1}
+                placeholder="輸入人數"
+                className="w-full rounded-lg border border-gray-300"
+              />
+            </div>
 
             <Button
               className="w-full bg-blue-600 hover:bg-blue-700"
-              onClick={handleBooking}
+              onClick={() => handleBooking(restaurant.id, selectedDate, selectedTime, numberOfPeople)}
               disabled={!selectedDate || !selectedTime || isLoading}
             >
               確認預約

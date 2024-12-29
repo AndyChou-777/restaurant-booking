@@ -91,30 +91,6 @@ function Header( {isLoggedIn, userRole, handleLogout, showTemporaryAlert} ) {
     }
 
     <NavigationMenuItem>
-      <NavigationMenuTrigger>{userRole || '未設定角色'}</NavigationMenuTrigger>
-      <NavigationMenuContent className="absolute left-0 bg-gray-800 w-full max-w-[700px] p-4 box-border">
-        <ul className="grid bg-gray-800 text-white w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-          <ListItem href="/business/dashboard" title="企業會員管理">
-            管理您的預約狀態，增加顧客的來源。企業會員可以享受更多的功能，如設定特別優惠，查看預約統計數據，
-            以及增加顧客忠誠度的工具。
-          </ListItem>
-          <ListItem href="/user/dashboard" title="一般會員管理">
-            一般會員可隨時查看自己的預約紀錄，管理已完成和待完成的預約，並且輕鬆修改個人資料或支付資訊。
-            此外，還可享受我們的會員專屬優惠。
-          </ListItem>
-          <ListItem href="/login" title="登入">
-            輕鬆登入並開始您的餐廳預約之旅。只需輸入帳號和密碼，即可快速進入會員專屬頁面，管理您的預約。
-            也可以選擇使用第三方登入服務，如 Google 或 Facebook。
-          </ListItem>
-          <ListItem href="/login" title="登出">
-            當您完成使用網站時，可以隨時選擇登出。登出後，您的帳戶資料將會保護，避免他人查看或修改您的資料。
-            記得在公共電腦或其他設備上登出，確保資料安全。
-          </ListItem>
-        </ul>
-      </NavigationMenuContent>
-    </NavigationMenuItem>
-
-    <NavigationMenuItem>
       <NavigationMenuTrigger>註冊會員</NavigationMenuTrigger>
       <NavigationMenuContent className="absolute left-0 bg-gray-800 w-full max-w-[700px] p-4 box-border">
         <ul className="grid bg-gray-800 text-white w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">

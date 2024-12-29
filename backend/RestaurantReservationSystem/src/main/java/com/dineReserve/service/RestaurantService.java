@@ -10,6 +10,7 @@ import com.dineReserve.model.dto.ReservationDTO;
 import com.dineReserve.model.dto.AvailabilityDTO;
 import com.dineReserve.model.dto.RestaurantDTO;
 import com.dineReserve.model.dto.RestaurantSearchDTO;
+import com.dineReserve.model.dto.UserReservationDTO;
 import com.dineReserve.model.entity.RestaurantAvailability;
 
 public interface RestaurantService {
@@ -28,7 +29,9 @@ public interface RestaurantService {
     ReservationDTO createReservation(Long userId, ReservationDTO reservationDTO);
     ReservationDTO updateReservation(Long id, ReservationDTO reservationDTO);
     void cancelReservation(Long id);
-    List<ReservationDTO> getUserReservations(Long userId);
+    void finishReservation(Long id);
+    List<UserReservationDTO> getUserReservations(Long userId);
+    List<UserReservationDTO> getBusinessReservations(Long userId);
     
     // 可用時間管理
     void addAvailability(AvailabilityDTO availabilityDTO);

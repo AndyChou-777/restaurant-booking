@@ -23,6 +23,7 @@ import com.dineReserve.model.dto.AvailabilityDTO;
 import com.dineReserve.model.dto.RestaurantDTO;
 import com.dineReserve.model.dto.RestaurantSearchDTO;
 import com.dineReserve.model.dto.TimeSlotDTO;
+import com.dineReserve.model.dto.UserReservationDTO;
 import com.dineReserve.model.entity.Reservation;
 import com.dineReserve.model.entity.Restaurant;
 import com.dineReserve.model.entity.RestaurantAvailability;
@@ -313,24 +314,70 @@ public class RestaurantServiceImpl implements RestaurantService {
             validateAvailability(dto.getRestaurantId(), dto.getReservationDate(), dto.getReservationTime());
         }
 
-        modelMapper.map(dto, reservation);
+        reservation.setReservationDate(dto.getReservationDate());
+        reservation.setReservationTime(dto.getReservationTime());
+        reservation.setNumberOfPeople(dto.getNumberOfPeople());
         reservation = reservationRepository.save(reservation);
+        
         return modelMapper.map(reservation, ReservationDTO.class);
     }
 
     @Override
     public void cancelReservation(Long id) {
+        // 檢查是否存在
         Reservation reservation = reservationRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException());
-        reservation.setStatus(Statu.CANCELLED);
+
+        // 執行刪除
+        reservationRepository.delete(reservation);
+    }
+    
+    @Override
+    public void finishReservation(Long id) {
+        // 找出該預約
+        Reservation reservation = reservationRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException());
+
+        // 修改狀態
+        reservation.setStatus(Statu.COMPLETED);
         reservationRepository.save(reservation);
     }
 
     @Override
-    public List<ReservationDTO> getUserReservations(Long userId) {
+    public List<UserReservationDTO> getUserReservations(Long userId) {
         return reservationRepository.findByUserId(userId).stream()
-                .map(reservation -> modelMapper.map(reservation, ReservationDTO.class))
-                .collect(Collectors.toList());
+            .map(reservation -> {
+                UserReservationDTO dto = modelMapper.map(reservation, UserReservationDTO.class);
+                dto.setName(reservation.getRestaurant().getName());
+                dto.setAddress(reservation.getRestaurant().getAddress());
+                return dto;
+            })
+            .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<UserReservationDTO> getBusinessReservations(Long userId) {
+        return restaurantRepository.findByOwnerId(userId).stream()
+            .flatMap(restaurant -> {
+                // 獲取該餐廳的所有預約
+                List<Reservation> reservations = reservationRepository.findByRestaurantId(restaurant.getId());
+                
+                // 將每個預約轉換為 DTO
+                return reservations.stream().map(reservation -> {
+                    UserReservationDTO dto = new UserReservationDTO();
+                    dto.setId(reservation.getId());
+                    dto.setRestaurantId(restaurant.getId());
+                    dto.setUserId(reservation.getUser().getId());
+                    dto.setReservationDate(reservation.getReservationDate());
+                    dto.setReservationTime(reservation.getReservationTime());
+                    dto.setNumberOfPeople(reservation.getNumberOfPeople());
+                    dto.setStatus(reservation.getStatus());
+                    dto.setName(restaurant.getName());
+                    dto.setAddress(restaurant.getAddress());
+                    return dto;
+                });
+            })
+            .collect(Collectors.toList());
     }
     
     @Override

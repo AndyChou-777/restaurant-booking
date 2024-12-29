@@ -77,9 +77,47 @@ export const cancelReservation = async (id) => {
   return response.json();
 };
 
+// 用戶成功報到
+export const finishReservation = async (id) => {
+  const url = `${API_BASE_URL}/finish/${id}`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || '預約無法完成');
+  }
+
+  return response.json();
+};
+
 // 獲取用戶預約
-export const getUserReservations = async (userId) => {
-  const url = `${API_BASE_URL}/user/${userId}`;
+export const getUserReservations = async () => {
+  const url = `${API_BASE_URL}/user`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || '無法獲取預約');
+  }
+
+  return response.json();
+};
+
+// 獲取用戶預約
+export const getBusinessReservations = async () => {
+  const url = `${API_BASE_URL}/business`;
   const response = await fetch(url, {
     method: 'GET',
     headers: {

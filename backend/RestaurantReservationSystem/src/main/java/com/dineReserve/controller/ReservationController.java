@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dineReserve.aop.CheckUserSession;
 import com.dineReserve.model.dto.LoginResponseDTO;
 import com.dineReserve.model.dto.ReservationDTO;
+import com.dineReserve.model.dto.UserReservationDTO;
 import com.dineReserve.response.ApiResponse;
 import com.dineReserve.service.RestaurantService;
 
@@ -60,7 +61,9 @@ public class ReservationController {
     public ResponseEntity<ApiResponse<ReservationDTO>> updateReservation(
             @PathVariable Long id,
             @Valid @RequestBody ReservationDTO reservationDTO) {
+    	System.out.print("收到的預約: " + reservationDTO);
         ReservationDTO updatedReservation = restaurantService.updateReservation(id, reservationDTO);
+        System.out.print("返回的預約: " + updatedReservation);
         return ResponseEntity.ok(ApiResponse.success("預約更新成功!", updatedReservation));
     }
 
@@ -70,13 +73,30 @@ public class ReservationController {
         restaurantService.cancelReservation(id);
         return ResponseEntity.ok(ApiResponse.success("預約取消成功!", null));
     }
-
-    @GetMapping("/user/{userId}")
+    
+    @GetMapping("/finish/{id}")
     @CheckUserSession
-    public ResponseEntity<ApiResponse<List<ReservationDTO>>> getUserReservations(
-            @PathVariable Long userId) {
-        List<ReservationDTO> reservations = restaurantService.getUserReservations(userId);
-        return ResponseEntity.ok(ApiResponse.success("用戶預約清單查詢成功!", reservations));
+    public ResponseEntity<ApiResponse<Void>> finishReservation(@PathVariable Long id) {
+        restaurantService.finishReservation(id);
+        return ResponseEntity.ok(ApiResponse.success("預約成功報到", null));
+    }
+
+    @GetMapping("/user")
+    @CheckUserSession
+    public ResponseEntity<ApiResponse<List<UserReservationDTO>>> getUserReservations(
+            HttpSession session) {
+    	LoginResponseDTO loginResponseDTO = (LoginResponseDTO) session.getAttribute("loginDTO");
+        List<UserReservationDTO> reservations = restaurantService.getUserReservations(loginResponseDTO.getId());
+        return ResponseEntity.ok(ApiResponse.success("用戶預約清單查詢成功", reservations));
+    }
+    
+    @GetMapping("/business")
+    @CheckUserSession
+    public ResponseEntity<ApiResponse<List<UserReservationDTO>>> getBusinessReservations(
+            HttpSession session) {
+    	LoginResponseDTO loginResponseDTO = (LoginResponseDTO) session.getAttribute("loginDTO");
+        List<UserReservationDTO> reservations = restaurantService.getBusinessReservations(loginResponseDTO.getId());
+        return ResponseEntity.ok(ApiResponse.success("用戶預約清單查詢成功", reservations));
     }
     
 }

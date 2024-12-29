@@ -21,7 +21,7 @@ import {
   Trash2,
   Edit
 } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog"
 import { AlertCircle } from "lucide-react"
 import {
   Alert,
@@ -36,15 +36,8 @@ import {
   deleteRestaurant,
   searchRestaurants 
 } from "@/service/restaurantService"
-import { Store, 
-  MapPin, 
-  FileText, 
-  DollarSign, 
-  Tags, 
-  Calendar, 
-  Clock, 
-  Image as ImageIcon,
-  Plus,
+import {
+  NotepadText,
   X,
   Save } from "lucide-react"
 import { fetchRestaurants } from "@/service/restaurantService"
@@ -59,10 +52,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { getBusinessReservations, cancelReservation, finishReservation } from "@/service/reservationService"
 
 function BusinessDashboard() {
   const [activeTab, setActiveTab] = useState("restaurants");
   const [restaurants, setRestaurants] = useState([]);
+  const [userData, setUserData] = useState(null)
   const [accountInfo, setAccountInfo] = useState({
     username: "business_user",
     email: "business@example.com",
@@ -113,6 +108,21 @@ function BusinessDashboard() {
   
       checkLoginStatus();
     }, []);
+
+    useEffect(() => {
+    
+        const fetchUserReservations = async () => {
+          try {
+            const apiResponse = await getBusinessReservations()
+            console.log('讀取餐廳預約資料: ', apiResponse);
+            setUserData(apiResponse);
+          } catch (error) {
+            console.error("預約資料讀取錯誤:", error);
+          }
+        }
+        
+        fetchUserReservations();
+      }, [])
 
     useEffect(() => {
       const loadRestaurants = async () => {
@@ -201,6 +211,32 @@ function BusinessDashboard() {
       }
     }
   };  
+
+  const handleCancel = async (name, id) => {
+      try {
+        const apiResponse = await cancelReservation(id);
+  
+        if (apiResponse.message === '預約取消成功!') {
+          alert(`${name} 預約取消成功!`)
+          window.location.reload()
+        }
+      } catch (error) {
+        console.error(error.message)
+      }
+    }
+
+  const handleFinish = async (id) => {
+    try {
+      const apiResponse = await finishReservation(id);
+
+      if (apiResponse.message === '預約成功報到') {
+        alert(`#${id} 預約成功報到!`)
+        window.location.reload()
+      }
+    } catch (error) {
+      console.error(error.message)
+    }
+  }
 
   const handleCreateNewRestaurant = async () => {
     try {
@@ -577,6 +613,93 @@ function BusinessDashboard() {
             </Card>
           );
 
+          case "orders":
+          return (
+            <Card className="bg-white text-black shadow-lg hover:shadow-2xl transition-all duration-300">
+              <CardHeader>
+                <CardTitle>預約管理</CardTitle>
+                <CardDescription>管理您的餐廳預約記錄</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-lg border bg-white overflow-hidden">
+                  {/* 表頭 */}
+                  <div className="grid grid-cols-8 bg-gray-100 p-3 font-semibold text-gray-700 border-b">
+                    <div className="col-span-1">餐廳</div>
+                    <div className="col-span-2">地址</div>
+                    <div className="col-span-1">日期</div>
+                    <div className="col-span-1">時間</div>
+                    <div className="col-span-1">人數</div>
+                    <div className="col-span-1">狀態</div>
+                    <div className="col-span-1 text-center">操作</div>
+                  </div>
+                  
+                  {/* 預約列表 */}
+                  {userData.data.map((reservation) => (
+                    <div 
+                    key={reservation.id}
+                    className="grid grid-cols-8 p-4 border-b last:border-b-0 hover:bg-gray-50 transition-all duration-200 items-center"
+                    >
+                      <div className="col-span-1 font-medium text-gray-900">
+                        {reservation.name}
+                      </div>
+                      <div className="col-span-2 text-gray-800">
+                        {reservation.address}
+                      </div>
+                      <div className="col-span-1 text-gray-800">
+                        {reservation.reservationDate}
+                      </div>
+                      <div className="col-span-1 text-gray-600">
+                        {reservation.reservationTime}
+                      </div>
+                      <div className="col-span-1 text-gray-600">
+                        {reservation.numberOfPeople} 位
+                      </div>
+                      <div className="col-span-1">
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-medium
+                          ${reservation.status === 'CONFIRMED' ? 'bg-blue-500 text-white' : 
+                            reservation.status === 'COMPLETED' ? 'bg-blue-500 text-white' : 
+                            reservation.status === 'CANCELLED' ? 'bg-red-500 text-white' : 
+                            'bg-gray-100 text-gray-800'}`}
+                      >
+                        {reservation.status === 'CONFIRMED' && '成功'}
+                        {reservation.status === 'COMPLETED' && '完成'}
+                        {reservation.status === 'CANCELLED' && '取消'}
+                      </span>
+                      </div>
+                      <div className="col-span-1 flex justify-center space-x-2">
+                      <Button 
+                      variant="outline"
+                      size="sm"
+                      className="text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
+                      onClick={() => {
+                        if (window.confirm('確定要完成此筆預約嗎？')) {
+                          handleFinish(reservation.id)
+                        }
+                      }}
+                    >
+                      完成
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      className="text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50"
+                      onClick={() => {
+                        if (window.confirm('確定要取消此預約嗎？')) {
+                          handleCancel(reservation.name, reservation.id)
+                        }
+                      }}
+                    >
+                      取消
+                    </Button>
+                  </div>
+                </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )
+
       case "account":
         return (
           <Card className="bg-white text-black shadow-lg hover:shadow-2xl transition-all duration-300">
@@ -841,6 +964,13 @@ function BusinessDashboard() {
           >
             <PlusCircle className="h-5 w-5 text-gray-300" />
             <span className="text-gray-300">新增餐廳</span>
+          </button>
+          <button 
+            className={`flex items-center space-x-3 p-3 w-full text-left rounded-lg ${activeTab === "orders" ? "bg-blue-600" : "hover:bg-gray-600"}`}
+            onClick={() => setActiveTab("orders")}
+          >
+            <NotepadText className="h-5 w-5 text-gray-300" />
+            <span className="text-gray-300">管理預約</span>
           </button>
           <button 
             className={`flex items-center space-x-3 p-3 w-full text-left rounded-lg ${activeTab === "account" ? "bg-blue-600" : "hover:bg-gray-600"}`}

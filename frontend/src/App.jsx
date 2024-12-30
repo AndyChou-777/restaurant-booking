@@ -28,6 +28,14 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState('');
 
+  const [searchParams, setSearchParams] = useState({
+      keyword: '',
+      minPrice: null,
+      maxPrice: null,
+      location: '',
+      tag: '',
+    });
+
   useEffect(() => {
 
   const initializeLoginStatus = async () => {
@@ -112,13 +120,13 @@ function App() {
       
         {/* 定義路由 */}
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home searchParams={searchParams} setSearchParams={setSearchParams} />} />
           <Route path="/login" element={<LoginPage handleLogin={handleLogin} />} />
           <Route path="/register/user" element={<UserRegisterPage />} />
           <Route path="/register/business" element={<BusinessRegisterPage />} />
           <Route path="/user/dashboard" element={<UserDashboard />} />
           <Route path="/business/dashboard" element={<BusinessDashboard />} />
-          <Route path="/restaurant-reservation" element={<RestaurantBookingApp />} />
+          <Route path="/restaurant-reservation" element={<RestaurantBookingApp searchParams={searchParams} setSearchParams={setSearchParams} showTemporaryAlert={showTemporaryAlert} />} />
         </Routes>
         
       <Footer />

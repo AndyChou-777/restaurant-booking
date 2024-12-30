@@ -10,12 +10,19 @@ import {
   CarouselPrevious 
 } from "@/components/ui/carousel"
 
-function Home() {
+function Home( { searchParams, setSearchParams } ) {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
 
   const handleSearch = () => {
     navigate('/restaurant-reservation');
+    setSearchParams ({
+          keyword: query,
+          minPrice: null,
+          maxPrice: null,
+          location: '',
+          tag: '',
+        });
   };
 
   const plugin = useRef(
@@ -38,28 +45,28 @@ function Home() {
       image: "/re8.jpg",
       title: "客製化推薦",
       description: "根據您的口味提供精準的餐廳推薦",
-      linkTo: "/recommendation",
+      linkTo: "/restaurant-reservation",
       linkText: "開始推薦"
     },
     {
       image: "/re9.jpg",
       title: "即時訂位",
       description: "快速、方便地預訂您心儀的餐廳",
-      linkTo: "/reservation",
+      linkTo: "/restaurant-reservation",
       linkText: "立即訂位"
     },
     {
       image: "/re3.jpg",
-      title: "會員優惠",
-      description: "獨家優惠等您來發現",
-      linkTo: "/register/user",
+      title: "美食社群",
+      description: "掌握全球最多的淺在客戶",
+      linkTo: "/register/business",
       linkText: "加入會員"
     },
     {
       image: "/re10.jpg",
-      title: "美食社群",
-      description: "分享您的美食體驗",
-      linkTo: "/community",
+      title: "會員優惠",
+      description: "獨家優惠等您來發現",
+      linkTo: "/register/user",
       linkText: "加入社群"
     }
   ];

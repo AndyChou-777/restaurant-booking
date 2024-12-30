@@ -9,15 +9,8 @@ import { fetchAvailabilities, getAllAvailabilities } from '@/service/availabilit
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { createReservation, getAvailabilities } from '@/service/reservationService';
 
-function RestaurantBookingApp() {
+function RestaurantBookingApp({ searchParams, setSearchParams, showTemporaryAlert }) {
   const [restaurants, setRestaurants] = useState([]);
-  const [searchParams, setSearchParams] = useState({
-    keyword: '',
-    people: 2,
-    minPrice: 0,
-    maxPrice: 1000,
-    location: ''
-  });
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
@@ -32,7 +25,7 @@ function RestaurantBookingApp() {
             image: restaurant.imageBase64List && restaurant.imageBase64List.length > 0 
               ? restaurant.imageBase64List[0]
               : '/placeholder-restaurant.jpg',
-            cuisine: restaurant.tags ? restaurant.tags.join(', ') : '未分類',
+            cuisine: restaurant.tags,
             priceRange: restaurant.averageSpending,
             location: restaurant.address,
             description: restaurant.description,
@@ -123,8 +116,19 @@ function RestaurantBookingApp() {
     
     const matchesLocation = searchParams.location === '' || 
       restaurant.location.toLowerCase().includes(searchParams.location.toLowerCase());
+
+    const matchesTags = searchParams.tag === '' || (
+      restaurant.cuisine.some(tag => 
+        tag.toLowerCase().includes(searchParams.tag.toLowerCase())
+      )
+    );
+
+    const matchesPriceRange = 
+    (searchParams.minPrice === null || restaurant.priceRange >= searchParams.minPrice) &&
+    (searchParams.maxPrice === null || restaurant.priceRange <= searchParams.maxPrice);
+
     
-    return matchesKeyword && matchesLocation;
+    return matchesKeyword && matchesLocation && matchesTags && matchesPriceRange;
   });
 
   const paginatedRestaurants = filteredRestaurants.slice((currentPage - 1) * 12, currentPage * 12);
@@ -132,54 +136,70 @@ function RestaurantBookingApp() {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* 搜索面板 */}
-      <div className="w-1/3 p-4 bg-gray-100 overflow-y-auto sticky top-0">
-        <h2 className="text-2xl font-bold mb-4">餐廳搜索</h2>
+      <div className="w-1/4 p-4 bg-gradient-to-b from-yellow-900 to-yellow-600 overflow-y-auto sticky top-0">
+        <h2 className="text-2xl font-bold mb-4 text-white">快速搜索</h2>
         
         <Input 
           placeholder="輸入餐廳名稱" 
-          className="mb-3"
+          className="mb-3 bg-gray-200"
           value={searchParams.keyword}
           onChange={(e) => setSearchParams({...searchParams, keyword: e.target.value})}
         />
-
-        <Select 
-          value={searchParams.people.toString()} 
-          onValueChange={(value) => setSearchParams({...searchParams, people: parseInt(value)})}>
-          <SelectTrigger className="mb-3 border-black">
-            <SelectValue placeholder="用餐人數" />
-          </SelectTrigger>
-          <SelectContent className="bg-white">
-            {[1, 2, 3, 4, 5, 6].map(num => (
-              <SelectItem key={num} value={num.toString()}>{num} 人</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
 
         <div className="flex space-x-2 mt-3">
           <Input 
             type="number" 
             placeholder="最低價格" 
-            value={searchParams.minPrice}
-            onChange={(e) => setSearchParams({...searchParams, minPrice: parseInt(e.target.value)})}
+            className='bg-gray-200'
+            value={searchParams.minPrice === null ? '' : searchParams.minPrice}
+            onChange={(e) => setSearchParams({
+              ...searchParams,
+              minPrice: e.target.value === '' ? null : parseInt(e.target.value)
+            })}
           />
           <Input 
             type="number" 
             placeholder="最高價格" 
-            value={searchParams.maxPrice}
-            onChange={(e) => setSearchParams({...searchParams, maxPrice: parseInt(e.target.value)})}
+            className='bg-gray-200'
+            value={searchParams.maxPrice === null ? '' : searchParams.maxPrice}
+            onChange={(e) => setSearchParams({
+              ...searchParams,
+              maxPrice: e.target.value === '' ? null : parseInt(e.target.value)
+            })}
           />
         </div>
 
         <Input 
           placeholder="地點" 
-          className="mt-3"
+          className="mt-3 bg-gray-200"
           value={searchParams.location}
           onChange={(e) => setSearchParams({...searchParams, location: e.target.value})}
         />
+
+        <Input 
+          placeholder="標籤" 
+          className="mt-3 bg-gray-200"
+          value={searchParams.tag}
+          onChange={(e) => setSearchParams({...searchParams, tag: e.target.value})}
+        /> 
+
+        <Button className="mt-3 w-full shadow-md text-white bg-gray-700 hover:bg-gray-800"
+        onClick={() => setSearchParams({
+              keyword: '',
+              minPrice: null,
+              maxPrice: null,
+              location: '',
+              tag: '',
+            })}
+        >
+          清空條件
+        </Button>
+
       </div>
+      
 
       {/* 餐廳結果 */}
-      <div className="w-2/3 p-4 overflow-y-auto">
+      <div className="w-3/4 p-4 overflow-y-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {paginatedRestaurants.map(restaurant => (
             <div key={restaurant.id} className="border rounded-lg shadow-md hover:bg-blue-50 transition-colors">
@@ -195,11 +215,19 @@ function RestaurantBookingApp() {
               
               <div className="p-3">
                 <h3 className="text-xl font-semibold">{restaurant.name}</h3>
-                <p className="text-gray-600">{restaurant.cuisine} | {restaurant.priceRange} $</p>
+                <p className="text-gray-600">
+                  {restaurant.location} | {restaurant.priceRange} $
+                  </p>
                 <p className="text-sm text-gray-500 mt-2">{restaurant.description}</p>
-                
+                <div className="flex gap-2 mt-2">
+                  {restaurant.cuisine.map((tag, index) => (
+                    <span key={index} className="bg-gray-100 text-xs px-2 py-1 rounded">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
                 <div className="mt-3">
-                  <h4 className="font-medium mb-2">可預約時段</h4>
+                  <h4 className="font-medium mb-2">今日尚可預約時段</h4>
                   <div className="flex flex-wrap gap-2">
                     {Array.isArray(restaurant.availableTimes) && 
                       restaurant.availableTimes.slice(0, 7).map(time => (
@@ -210,7 +238,7 @@ function RestaurantBookingApp() {
                   </div>
                 </div>
 
-                <BookingDialog restaurant={restaurant} />
+                <BookingDialog restaurant={restaurant} showTemporaryAlert={showTemporaryAlert} />
               </div>
             </div>
           ))}
@@ -234,7 +262,7 @@ function RestaurantBookingApp() {
 }
 
 // BookingDialog 組件
-function BookingDialog({ restaurant }) {
+function BookingDialog({ restaurant, showTemporaryAlert }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
@@ -405,7 +433,8 @@ function BookingDialog({ restaurant }) {
       }
     } catch (error) {
       console.error('預約失敗:', error);
-      // 可以在這裡添加錯誤提示UI
+      setIsOpen(false)
+      showTemporaryAlert('預約失敗', '用戶尚未登入或登入錯誤!', '/');
     }
   };
 
@@ -449,7 +478,7 @@ function BookingDialog({ restaurant }) {
     <>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
-          <Button className="mt-3 w-full bg-blue-600 hover:bg-blue-700">
+          <Button className="mt-3 w-full text-white bg-blue-500 hover:bg-blue-600">
             預約餐廳
           </Button>
         </DialogTrigger>
@@ -508,7 +537,7 @@ function BookingDialog({ restaurant }) {
       </Dialog>
 
       <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
-        <AlertDialogContent>
+        <AlertDialogContent className='bg-white'>
           <AlertDialogHeader>
             <AlertDialogTitle>預約成功！</AlertDialogTitle>
             <AlertDialogDescription>
@@ -516,7 +545,9 @@ function BookingDialog({ restaurant }) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setShowConfirm(false)}>
+            <AlertDialogAction
+            className='bg-blue-500 text-white font-bold shadow-md hover:bg-blue-600 rounded-[8px]'
+            onClick={() => setShowConfirm(false)}>
               確定
             </AlertDialogAction>
           </AlertDialogFooter>

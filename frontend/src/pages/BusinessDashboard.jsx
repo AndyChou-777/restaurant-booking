@@ -658,7 +658,7 @@ function BusinessDashboard() {
                       <span
                         className={`px-3 py-1 rounded-full text-sm font-medium
                           ${reservation.status === 'CONFIRMED' ? 'bg-blue-500 text-white' : 
-                            reservation.status === 'COMPLETED' ? 'bg-blue-500 text-white' : 
+                            reservation.status === 'COMPLETED' ? 'bg-green-600 text-white' : 
                             reservation.status === 'CANCELLED' ? 'bg-red-500 text-white' : 
                             'bg-gray-100 text-gray-800'}`}
                       >
@@ -858,7 +858,7 @@ function BusinessDashboard() {
               <div className="text-right">
               <Button 
                 variant="outline" 
-                className="bg-blue-500 text-white font-bold hover:bg-blue-600 rounded-[8px] mt-2 mb-2"
+                className="bg-blue-500 text-white font-bold hover:bg-blue-600 rounded-[8px] mt-2 mb-2 hover:text-white"
                 onClick={() => {
                   const newSlot = { startDate: "", endDate: "", startTime: "", endTime: "" };
                   setSelectedRestaurant(prev => ({ ...prev, timeSlots: [...prev.timeSlots, newSlot] }));

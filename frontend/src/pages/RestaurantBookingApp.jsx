@@ -8,6 +8,7 @@ import { getAllRestaurants } from '@/service/restaurantService';
 import { fetchAvailabilities, getAllAvailabilities } from '@/service/availabilityService';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { createReservation, getAvailabilities } from '@/service/reservationService';
+import { Search, UtensilsCrossed, CircleDollarSign, MapPin, Tag, DollarSign, Clock, Image} from 'lucide-react';
 
 function RestaurantBookingApp({ searchParams, setSearchParams, showTemporaryAlert }) {
   const [restaurants, setRestaurants] = useState([]);
@@ -136,15 +137,28 @@ function RestaurantBookingApp({ searchParams, setSearchParams, showTemporaryAler
   return (
     <div className="flex h-screen overflow-hidden">
       {/* 搜索面板 */}
-      <div className="w-1/4 p-4 bg-gradient-to-b from-yellow-900 to-yellow-600 overflow-y-auto sticky top-0">
-        <h2 className="text-2xl font-bold mb-4 text-white">快速搜索</h2>
+      <div className="w-1/4 p-4 bg-gradient-to-b from-yellow-700 to-yellow-500 overflow-y-auto sticky top-0">
+        <h2 className="text-2xl font-bold mb-6 text-black flex items-center space-x-2">
+          <Search /> 
+          <span>快速搜索</span>
+        </h2>
         
+        <div className="font-bold mb-3 text-gray-800 flex items-center space-x-2">
+          <UtensilsCrossed /> 
+          <span>餐廳名稱</span>
+        </div>
+
         <Input 
-          placeholder="輸入餐廳名稱" 
+          placeholder="查詢餐廳" 
           className="mb-3 bg-gray-200"
           value={searchParams.keyword}
           onChange={(e) => setSearchParams({...searchParams, keyword: e.target.value})}
         />
+
+        <div className="font-bold mb-3 text-gray-800 flex items-center space-x-2">
+          <CircleDollarSign /> 
+          <span>平均消費</span>
+        </div>
 
         <div className="flex space-x-2 mt-3">
           <Input 
@@ -169,12 +183,22 @@ function RestaurantBookingApp({ searchParams, setSearchParams, showTemporaryAler
           />
         </div>
 
+        <div className="font-bold mb-3 mt-3 text-gray-800 flex items-center space-x-2">
+          <MapPin /> 
+          <span>餐廳地址</span>
+        </div>
+
         <Input 
           placeholder="地點" 
           className="mt-3 bg-gray-200"
           value={searchParams.location}
           onChange={(e) => setSearchParams({...searchParams, location: e.target.value})}
         />
+
+        <div className="font-bold mb-3 mt-3 text-gray-800 flex items-center space-x-2">
+          <Tag /> 
+          <span>餐廳標籤</span>
+        </div>
 
         <Input 
           placeholder="標籤" 
@@ -183,7 +207,7 @@ function RestaurantBookingApp({ searchParams, setSearchParams, showTemporaryAler
           onChange={(e) => setSearchParams({...searchParams, tag: e.target.value})}
         /> 
 
-        <Button className="mt-3 w-full shadow-md text-white bg-gray-700 hover:bg-gray-800"
+        <Button className="mt-3 w-full font-bold py-2 text-white bg-gradient-to-r from-gray-900 to-gray-600 hover:fromgray-800 hover:to-gray-500 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
         onClick={() => setSearchParams({
               keyword: '',
               minPrice: null,
@@ -194,44 +218,56 @@ function RestaurantBookingApp({ searchParams, setSearchParams, showTemporaryAler
         >
           清空條件
         </Button>
-
       </div>
       
-
       {/* 餐廳結果 */}
-      <div className="w-3/4 p-4 overflow-y-auto">
+      <div className="w-3/4 p-4 overflow-y-auto bg-gray-200">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {paginatedRestaurants.map(restaurant => (
-            <div key={restaurant.id} className="border rounded-lg shadow-md hover:bg-blue-50 transition-colors">
-              <img 
-                src={restaurant.image} 
-                alt={restaurant.name} 
-                className="w-full h-48 object-cover rounded-t-lg"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = '/placeholder-restaurant.jpg';
-                }}
-              />
+            <div key={restaurant.id} className="bg-white border rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="relative">
+                <img 
+                  src={restaurant.image} 
+                  alt={restaurant.name} 
+                  className="w-full h-48 object-cover rounded-t-lg brightness-95"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/placeholder-restaurant.jpg';
+                  }}
+                />
+              </div>
               
-              <div className="p-3">
-                <h3 className="text-xl font-semibold">{restaurant.name}</h3>
-                <p className="text-gray-600">
-                  {restaurant.location} | {restaurant.priceRange} $
-                  </p>
-                <p className="text-sm text-gray-500 mt-2">{restaurant.description}</p>
-                <div className="flex gap-2 mt-2">
+              <div className="p-4">
+                <h3 className="text-xl font-bold text-gray-800 mb-2 font-serif">{restaurant.name}</h3>
+                
+                <div className="flex items-center text-gray-600 mb-2">
+                  <MapPin size={16} className="mr-1" />
+                  <span className="text-sm">{restaurant.location}</span>
+                  <span className="mx-2">|</span>
+                  <DollarSign size={16} className="mr-1" />
+                  <span className="text-sm">{restaurant.priceRange}</span>
+                </div>
+
+                <p className="text-l text-black mb-3 line-clamp-2">{restaurant.description}</p>
+                
+                <div className="flex flex-wrap gap-2 mb-3">
                   {restaurant.cuisine.map((tag, index) => (
-                    <span key={index} className="bg-gray-100 text-xs px-2 py-1 rounded">
+                    <span key={index} className="inline-flex items-center bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full">
+                      <Tag size={12} className="mr-1" />
                       {tag}
                     </span>
                   ))}
                 </div>
-                <div className="mt-3">
-                  <h4 className="font-medium mb-2">今日尚可預約時段</h4>
+
+                <div className="border-t pt-3">
+                  <h4 className="flex items-center font-medium text-black font-bold mb-2">
+                    <Clock size={16} className="mr-2" />
+                    當日可預約時段
+                  </h4>
                   <div className="flex flex-wrap gap-2">
                     {Array.isArray(restaurant.availableTimes) && 
-                      restaurant.availableTimes.slice(0, 7).map(time => (
-                        <span key={time} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                      restaurant.availableTimes.slice(0, 12).map(time => (
+                        <span key={time} className="bg-blue-400 text-white text-xs px-2 py-1 rounded-full">
                           {time}
                         </span>
                       ))}
@@ -241,19 +277,6 @@ function RestaurantBookingApp({ searchParams, setSearchParams, showTemporaryAler
                 <BookingDialog restaurant={restaurant} showTemporaryAlert={showTemporaryAlert} />
               </div>
             </div>
-          ))}
-        </div>
-
-        {/* 分頁 */}
-        <div className="flex justify-center mt-6 space-x-2">
-          {Array.from({ length: Math.ceil(filteredRestaurants.length / 12) }, (_, i) => (
-            <Button 
-              key={i} 
-              variant={currentPage === i + 1 ? "default" : "outline"}
-              onClick={() => setCurrentPage(i + 1)}
-            >
-              {i + 1}
-            </Button>
           ))}
         </div>
       </div>
@@ -306,25 +329,6 @@ function BookingDialog({ restaurant, showTemporaryAlert }) {
     setIsLoading(false);
   };
 
-  const getTimeRangeForDate = (date) => {
-    if (!date) return null;
-    
-    const checkDate = new Date(date);
-    checkDate.setHours(0, 0, 0, 0);
-    
-    const range = availableDateRanges.find(range => {
-      const rangeStart = new Date(range.startDate);
-      const rangeEnd = new Date(range.endDate);
-      rangeStart.setHours(0, 0, 0, 0);
-      rangeEnd.setHours(0, 0, 0, 0);
-      
-      return checkDate >= rangeStart && checkDate <= rangeEnd;
-    });
-
-    console.log('Found time range for date:', date, range);
-    return range;
-  };
-
   const isDateInRange = (date) => {
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
@@ -344,43 +348,6 @@ function BookingDialog({ restaurant, showTemporaryAlert }) {
 
       return checkDate >= startDate && checkDate <= endDate;
     });
-  };
-
-  const generateTimeSlots = (startTime, endTime) => {
-    const slots = [];
-    const [startHour, startMinute] = startTime.split(':').map(Number);
-    const [endHour, endMinute] = endTime.split(':').map(Number);
-    
-    const startTotalMinutes = startHour * 60 + startMinute;
-    const endTotalMinutes = endHour * 60 + endMinute;
-    
-    const now = new Date();
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
-    const currentTotalMinutes = currentHour * 60 + currentMinute;
-    
-    const isToday = selectedDate && 
-      selectedDate.getDate() === now.getDate() &&
-      selectedDate.getMonth() === now.getMonth() &&
-      selectedDate.getFullYear() === now.getFullYear();
-
-    for (let time = startTotalMinutes; time < endTotalMinutes; time += 30) {
-      const hour = Math.floor(time / 60);
-      const minute = time % 60;
-      const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-      
-      // 如果是今天，只顯示未來的時間段
-      if (isToday && time <= currentTotalMinutes) {
-        continue;
-      }
-      
-      slots.push({
-        time: timeString,
-        disabled: false
-      });
-    }
-    
-    return slots;
   };
 
   const getAvailableTimesForDate = async (date) => {
@@ -478,7 +445,7 @@ function BookingDialog({ restaurant, showTemporaryAlert }) {
     <>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
-          <Button className="mt-3 w-full text-white bg-blue-500 hover:bg-blue-600">
+          <Button className="mt-3 w-full text-white font-bold bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 shadow-lg shadow-blue-500/20 hover:shadow-blue-600/30 transition-all duration-300">
             預約餐廳
           </Button>
         </DialogTrigger>

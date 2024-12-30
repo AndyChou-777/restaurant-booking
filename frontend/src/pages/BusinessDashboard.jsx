@@ -15,7 +15,7 @@ import {
   CalendarCheck, 
   MenuSquare, 
   Images, 
-  Settings,
+  Search,
   User,
   PlusCircle,
   Trash2,

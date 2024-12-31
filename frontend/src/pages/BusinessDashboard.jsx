@@ -19,9 +19,11 @@ import {
   User,
   PlusCircle,
   Trash2,
-  Edit
+  Edit,
+  Check,
+  CheckCheckIcon
 } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, } from "@/components/ui/dialog"
 import { AlertCircle } from "lucide-react"
 import {
   Alert,
@@ -36,10 +38,7 @@ import {
   deleteRestaurant,
   searchRestaurants 
 } from "@/service/restaurantService"
-import {
-  NotepadText,
-  X,
-  Save } from "lucide-react"
+import { NotepadText, X, Save, Settings2, Terminal, ShoppingCart, Bell, Settings, Store, Clock, Users, Utensils, MapPin, Activity, Calendar, Phone, Mail, CircleCheckBig, SquarePen, CircleDollarSign, Tag, Hourglass, Image, ImagePlus, FolderPen, CirclePlus} from "lucide-react"
 import { fetchRestaurants } from "@/service/restaurantService"
 import {
   AlertDialog,
@@ -270,8 +269,8 @@ function BusinessDashboard() {
         return (
           <Card className="bg-white text-black shadow-lg hover:shadow-2xl transition-all duration-300">
             <CardHeader>
-              <CardTitle>餐廳管理</CardTitle>
-              <CardDescription>查看和管理您的餐廳</CardDescription>
+              <CardTitle className='flex pb-4'> <Terminal className="mr-2" />餐廳管理</CardTitle>
+              <CardDescription className='border-t pt-4 text-base flex'> <Settings2 className="mr-2" /> 在此查看和管理您集團旗下的餐廳</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -281,19 +280,21 @@ function BusinessDashboard() {
                     className="border p-4 rounded flex justify-between items-center hover:bg-gray-50"
                   >
                     <div>
-                      <div className="font-bold text-lg">{restaurant.name}</div>
-                      <div className="text-sm text-gray-600">{restaurant.address}</div>
-                      <div className="text-sm">{restaurant.description}</div>
+                      <div className="font-bold text-lg flex border-b pb-4 pt-2"><Utensils className="mr-2"/> {restaurant.name}</div>
+                      <div className="text-sm text-black mt-4 flex"><MapPin className="mr-2"/> <p className="mt-1">{restaurant.address} </p><CircleDollarSign className="mx-2"/> <p className="mt-1">平均消費 {restaurant.averageSpending} $</p></div>
+                      <div className="text-sm flex my-4"> <FolderPen className="mr-2"/> <p className="mt-1">{restaurant.description}</p></div>
                       <div className="text-sm">
-                        可供預約時間段:
+                        <div className="flex">
+                        <Clock className="mr-2"/>可供預約時間段
+                        </div>
                         {restaurant.timeSlots && restaurant.timeSlots.length > 0 ? (
-                          <div className="mt-2 space-y-1">
+                          <div className="my-2 space-y-1">
                             {restaurant.timeSlots.map((slot, index) => (
                               <div
                                 key={index}
                                 className="ml-2 text-white bg-blue-400 text-xs px-2 py-1 rounded inline-block"
                               >
-                                {slot.startDate} 至 {slot.endDate} | {slot.startTime} ~ {slot.endTime} 
+                                 {slot.startDate} 至 {slot.endDate} | {slot.startTime} ~ {slot.endTime} 
                               </div>
                             ))}
                           </div>
@@ -301,20 +302,20 @@ function BusinessDashboard() {
                           <span className="ml-2 text-gray-500">無可用時間段</span>
                         )}
                       </div>
-                      <div className="text-sm">
-                        平均消費: ${restaurant.averageSpending}
-                      </div>
                       {restaurant.tags && restaurant.tags.length > 0 && (
                         <div className="flex gap-2 mt-2">
                           {restaurant.tags.map((tag, index) => (
-                            <span key={index} className="bg-gray-100 text-xs px-2 py-1 rounded">
+                            <span key={index} className="inline-flex items-center bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full">
+                              <Tag size={12} className="mr-1" />
                               {tag}
                             </span>
                           ))}
                         </div>
                       )}
+                     
                       {restaurant.imageBase64List && restaurant.imageBase64List.length > 0 && (
                         <div className="flex gap-2 mt-2">
+                          <Image className="mr"/> 圖片預覽
                           {restaurant.imageBase64List.slice(0, 2).map((image, index) => (
                             <img 
                               key={index}
@@ -373,14 +374,14 @@ function BusinessDashboard() {
           return (
             <Card className="bg-white text-black shadow-lg hover:shadow-2xl transition-all duration-300">
               <CardHeader>
-                <CardTitle>新增餐廳</CardTitle>
-                <CardDescription>建立您的新餐廳</CardDescription>
+                <CardTitle className='flex pb-4 border-b'> <SquarePen className="mr-2"/> 新增餐廳</CardTitle>
+                <CardDescription></CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {/* 餐廳名稱 */}
                   <div>
-                    <Label>餐廳名稱</Label>
+                    <Label className='flex mb-4'> <Utensils className="mr-2"/> <p className="text-base">餐廳名稱</p></Label>
                     <Input
                       value={newRestaurant.name}
                       onChange={(e) => setNewRestaurant(prev => ({ ...prev, name: e.target.value }))}
@@ -389,7 +390,7 @@ function BusinessDashboard() {
         
                   {/* 餐廳地址 */}
                   <div>
-                    <Label>餐廳地址</Label>
+                    <Label className='flex mb-4'> <MapPin className="mr-2"/> <p className="text-base">餐廳地址</p></Label>
                     <Input
                       value={newRestaurant.address}
                       onChange={(e) => setNewRestaurant(prev => ({ ...prev, address: e.target.value }))}
@@ -398,7 +399,7 @@ function BusinessDashboard() {
         
                   {/* 餐廳描述 */}
                   <div>
-                    <Label>餐廳描述</Label>
+                    <Label className='flex mb-4'> <FolderPen className="mr-2"/> <p className="text-base">餐廳描述</p></Label>
                     <Textarea
                       value={newRestaurant.description}
                       onChange={(e) => setNewRestaurant(prev => ({ ...prev, description: e.target.value }))}
@@ -407,7 +408,7 @@ function BusinessDashboard() {
         
                   {/* 平均消費金額 */}
                   <div>
-                    <Label>平均消費金額</Label>
+                    <Label className='flex mb-4'> <CircleDollarSign className="mr-2"/> <p className="text-base">平均消費</p></Label>
                     <Input
                       type="number"
                       value={newRestaurant.averageSpending}
@@ -417,7 +418,7 @@ function BusinessDashboard() {
 
                   {/* 餐廳標籤 */}
                   <div>
-                    <Label>餐廳標籤</Label>
+                    <Label className='flex mb-4'> <Tag className="mr-2"/> <p className="text-base">餐廳標籤</p></Label>
                     <Input
                       placeholder="請輸入標籤（以半形逗號分隔）"
                       value={newRestaurant.tags.join(", ")}
@@ -432,7 +433,7 @@ function BusinessDashboard() {
         
                   {/* 時間段輸入區域 */}
                   <div>
-                    <Label>新增可預約時間段</Label>
+                    <Label className='flex mb-4'> <Clock className="mr-2"/> <p className="text-base">預約時段</p></Label>
                     <div className="grid grid-cols-2 gap-4 mt-2">
                       <div>
                         <Label>開始日期</Label>
@@ -487,14 +488,14 @@ function BusinessDashboard() {
                           alert("請完整填寫時間段！");
                         }
                       }}
-                      className="mt-2"
+                      className="mt-4 bg-blue-500 text-white hover:bg-blue-600 rounded-[8px]"
                     >
-                    新增時間段
+                    <CirclePlus /> 新增時間段
                   </Button>
                   </div>
                   
                   <div className="mt-4">
-                    <Label>已新增的時間段</Label>
+                    <Label className='flex mb-4'> <Hourglass className="mr-2"/> <p className="text-base">已新增的時間段</p></Label>
                     <div className="space-y-2">
                       {newRestaurant.timeSlots.map((slot, index) => (
                         <div
@@ -521,7 +522,7 @@ function BusinessDashboard() {
                   </div>
 
                   <div>
-                    <Label>餐廳圖片</Label>
+                    <Label className='flex mb-4'> <ImagePlus className="mr-2"/> <p className="text-base">餐廳圖片</p></Label>
                     <div className="border-2 border-gray-200 rounded-lg p-4 bg-gray-50">
                       <div className="flex items-center">
                         <input
@@ -558,7 +559,7 @@ function BusinessDashboard() {
                           htmlFor="file-upload"
                           className="inline-flex cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
                         >
-                          選擇檔案
+                           選擇檔案
                         </label>
                         <span className="ml-4 text-black">
                           {newRestaurant.imageBase64List.length 
@@ -571,7 +572,7 @@ function BusinessDashboard() {
 
                   {/* 預覽圖片 */}
                   <div className="mt-4">
-                    <Label>預覽圖片</Label>
+                    <Label className='flex mb-4'> <Image className="mr-2"/> <p className="text-base">預覽圖片</p></Label>
                     <div className="flex gap-4">
                       {newRestaurant.imageBase64List.map((image, index) => (
                         <div key={index} className="relative">
@@ -624,13 +625,13 @@ function BusinessDashboard() {
                 <div className="rounded-lg border bg-white overflow-hidden">
                   {/* 表頭 */}
                   <div className="grid grid-cols-8 bg-gray-100 p-3 font-semibold text-gray-700 border-b">
-                    <div className="col-span-1">餐廳</div>
-                    <div className="col-span-2">地址</div>
-                    <div className="col-span-1">日期</div>
-                    <div className="col-span-1">時間</div>
-                    <div className="col-span-1">人數</div>
-                    <div className="col-span-1">狀態</div>
-                    <div className="col-span-1 text-center">操作</div>
+                    <div className="col-span-1 flex"><Utensils className="mr-2 ml-1"/> 餐廳</div>
+                    <div className="col-span-2 flex"><MapPin className="mr-2 ml-1"/> 地址</div>
+                    <div className="col-span-1 flex"><Calendar className="mr-2"/> 日期</div>
+                    <div className="col-span-1 flex"><Clock className="mr-2"/> 時間</div>
+                    <div className="col-span-1 flex"><Users className="mr-2"/> 人數</div>
+                    <div className="col-span-1 flex"><Activity className="mr-2"/> 狀態</div>
+                    <div className="col-span-1 text-center flex"><Settings className="mr-2 ml-6"/> 操作</div>
                   </div>
                   
                   {/* 預約列表 */}
@@ -667,30 +668,30 @@ function BusinessDashboard() {
                         {reservation.status === 'CANCELLED' && '取消'}
                       </span>
                       </div>
-                      <div className="col-span-1 flex justify-center space-x-2">
+                      <div className="col-span-1 flex justify-center space-x-2 mr-4">
                       <Button 
                       variant="outline"
                       size="sm"
-                      className="text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
+                      className="text-white hover:text-white bg-blue-500 hover:bg-blue-600 rounded-[8px]"
                       onClick={() => {
                         if (window.confirm('確定要完成此筆預約嗎？')) {
                           handleFinish(reservation.id)
                         }
                       }}
                     >
-                      完成
+                      <CircleCheckBig className="mr-2 h-4 w-4" /> 完成
                     </Button>
                     <Button 
                       variant="outline"
                       size="sm"
-                      className="text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50"
+                      className="text-white hover:text-white bg-red-500 hover:bg-red-600 rounded-[8px]"
                       onClick={() => {
-                        if (window.confirm('確定要取消此預約嗎？')) {
+                        if (window.confirm('確定要刪除此預約嗎？')) {
                           handleCancel(reservation.name, reservation.id)
                         }
                       }}
                     >
-                      取消
+                      <Trash2 className="mr-2 h-4 w-4" /> 刪除
                     </Button>
                   </div>
                 </div>
@@ -753,33 +754,33 @@ function BusinessDashboard() {
       <Dialog open={!!selectedRestaurant} onOpenChange={() => setSelectedRestaurant(null)}>
         <DialogContent className="bg-white max-w-3xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
-            <DialogTitle>編輯餐廳</DialogTitle>
+            <DialogTitle className='flex pb-4 border-b'> <SquarePen className="mr-2"/> <p className="mt-1">編輯餐廳</p></DialogTitle>
           </DialogHeader>
           <div key={selectedRestaurant.id} className="overflow-y-auto pr-4 max-h-[calc(90vh-8rem)]">
             {/* 基本資訊 */}
             <div>
-              <Label>餐廳名稱</Label>
+              <Label className='flex mb-4'> <Utensils className="mr-2"/> <p className="text-base">餐廳名稱</p></Label>
               <Input 
                 value={selectedRestaurant.name}
                 onChange={(e) => setSelectedRestaurant(prev => ({ ...prev, name: e.target.value }))}
               />
             </div>
             <div>
-              <Label>餐廳地址</Label>
+              <Label className='flex my-4'> <MapPin className="mr-2"/> <p className="text-base">餐廳地址</p></Label>
               <Input 
                 value={selectedRestaurant.address}
                 onChange={(e) => setSelectedRestaurant(prev => ({ ...prev, address: e.target.value }))}
               />
             </div>
             <div>
-              <Label>餐廳介紹</Label>
+              <Label className='flex my-4'> <FolderPen className="mr-2"/> <p className="text-base">餐廳描述</p></Label>
               <Textarea 
                 value={selectedRestaurant.description}
                 onChange={(e) => setSelectedRestaurant(prev => ({ ...prev, description: e.target.value }))}
               />
             </div>
             <div>
-              <Label>平均消費金額</Label>
+              <Label className='flex my-4'> <CircleDollarSign className="mr-2"/> <p className="text-base">平均消費</p></Label>
               <Input
                 type="number"
                 value={selectedRestaurant.averageSpending}
@@ -787,7 +788,7 @@ function BusinessDashboard() {
               />
             </div>
             <div>
-              <Label>餐廳標籤</Label>
+              <Label className='flex my-4'> <Tag className="mr-2"/> <p className="text-base">餐廳標籤</p></Label>
               <Input
                 placeholder="請輸入標籤（以半形逗號分隔）"
                 value={selectedRestaurant.tags.join(", ")}
@@ -801,7 +802,7 @@ function BusinessDashboard() {
             </div>
             {/* 時間段管理 */}
             <div>
-              <Label>可預約時間段</Label>
+              <Label className='flex my-4'> <Clock className="mr-2"/> <p className="text-base">可預約時段</p></Label>
               <div className="space-y-4">
                 {selectedRestaurant.timeSlots.map((slot, index) => (
                   <div key={index} className="flex items-center space-x-2">
@@ -871,7 +872,7 @@ function BusinessDashboard() {
   
             {/* 圖片管理 */}
           <div>
-            <Label>圖片</Label>
+            <Label className='flex mb-4'> <ImagePlus className="mr-2"/> <p className="text-base">餐廳圖片</p></Label>
             <div className="flex flex-wrap gap-4">
               {selectedRestaurant.imageBase64List.map((image, index) => (
                 <div key={index} className="relative">
@@ -894,10 +895,13 @@ function BusinessDashboard() {
                 </div>
               ))}
             </div>
-            <div className="mt-4">
-              <Input 
+            <div className="border-2 border-gray-200 rounded-lg p-4 bg-gray-50 my-4">
+              <input 
                 type="file" 
-                accept="image/*" 
+                accept="image/*"
+                multiple
+                className="hidden"
+                id="file-uploads"
                 onChange={(e) => {
                   const file = e.target.files[0];
                   if (file) {
@@ -912,6 +916,17 @@ function BusinessDashboard() {
                   }
                 }}
               />
+              <label
+                htmlFor="file-uploads"
+                className="inline-flex cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+              >
+                  選擇檔案
+              </label>
+              <span className="ml-4 text-black">
+                {selectedRestaurant.imageBase64List.length 
+                  ? `已選擇 ${selectedRestaurant.imageBase64List.length} 個檔案` 
+                  : '尚未選擇檔案'}
+              </span>
             </div>
           </div>
   

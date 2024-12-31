@@ -9,11 +9,10 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { User, ShoppingCart, Bell, Settings, Store, CalendarCheck, Clock, Users, ClipboardCheck } from "lucide-react"
+import { User, ShoppingCart, Bell, Settings, Store, CalendarCheck, Clock, Users, ClipboardCheck, Edit, Trash2, Utensils, MapPin, Activity, Calendar, Phone, Mail,  } from "lucide-react"
 import { checkSession } from "@/service/authService"
 import { useNavigate } from "react-router-dom"
 import { getUserReservations, getAvailabilities, updateReservation, cancelReservation } from "@/service/reservationService"
-import { Calendar } from "@/components/ui/calendar";
 import { 
   Dialog,
   DialogContent,
@@ -63,6 +62,12 @@ function UserDashboard( { showTemporaryAlert } ) {
         if (apiResponse.message === "登入成功") {
           if (apiResponse.data.role === "BUSINESS_USER") {
             showTemporaryAlert('身分錯誤', '請先登出後，改用企業帳號登入!', 'error', '/login');
+          } else {
+            setEditData({
+              name: apiResponse.data.username,
+              email: apiResponse.data.email,
+              phone: '0910-984-374'
+            })
           }
         } 
       } catch (error) {
@@ -102,37 +107,43 @@ function UserDashboard( { showTemporaryAlert } ) {
       case "profile":
         return (
           <Card className="bg-white text-black shadow-lg hover:shadow-2xl transition-all duration-300">
-            <CardHeader>
-              <CardTitle>個人資料管理</CardTitle>
-              <CardDescription>查看和編輯您的個人資訊</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <Label>姓名</Label>
-                  <Input 
-                    value={editData.name} 
-                    onChange={(e) => setEditData(prev => ({ ...prev, name: e.target.value }))} 
-                    className="bg-gray-100 text-black border-2 rounded-lg focus:ring-2 focus:ring-indigo-500 p-3"
-                  />
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold">個人資料管理</CardTitle>
+        <CardDescription>查看和編輯您的個人資訊</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-6">
+          {/* Profile Display */}
+          <div className="bg-gray-50 rounded-xl p-6">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-4 p-3 bg-white rounded-lg shadow-sm">
+                <User className="text-blue-500 w-5 h-5" />
+                <div className="flex-1">
+                  <p className="text-sm text-gray-500">姓名</p>
+                  <p className="text-lg font-medium">{editData.name}</p>
                 </div>
-                <div>
-                  <Label>電子郵件</Label>
-                  <Input 
-                    value={editData.email} 
-                    onChange={(e) => setEditData(prev => ({ ...prev, email: e.target.value }))} 
-                    className="bg-gray-100 text-black border-2 rounded-lg focus:ring-2 focus:ring-indigo-500 p-3"
-                  />
-                </div>
-                <Button 
-                  onClick={handleSaveProfile} 
-                  className="w-[100px] bg-blue-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-blue-600"
-                >
-                  儲存變更
-                </Button>
               </div>
-            </CardContent>
-          </Card>
+              
+              <div className="flex items-center space-x-4 p-3 bg-white rounded-lg shadow-sm">
+                <Mail className="text-blue-500 w-5 h-5" />
+                <div className="flex-1">
+                  <p className="text-sm text-gray-500">電子郵件</p>
+                  <p className="text-lg font-medium">{editData.email}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-4 p-3 bg-white rounded-lg shadow-sm">
+                <Phone className="text-blue-500 w-5 h-5" />
+                <div className="flex-1">
+                  <p className="text-sm text-gray-500">連絡電話</p>
+                  <p className="text-lg font-medium">{editData.phone}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
         )
         case "orders":
           return (
@@ -145,13 +156,13 @@ function UserDashboard( { showTemporaryAlert } ) {
                 <div className="rounded-lg border bg-white overflow-hidden">
                   {/* 表頭 */}
                   <div className="grid grid-cols-8 bg-gray-100 p-3 font-semibold text-gray-700 border-b">
-                    <div className="col-span-1">餐廳</div>
-                    <div className="col-span-2">地址</div>
-                    <div className="col-span-1">日期</div>
-                    <div className="col-span-1">時間</div>
-                    <div className="col-span-1">人數</div>
-                    <div className="col-span-1">狀態</div>
-                    <div className="col-span-1 text-center">操作</div>
+                    <div className="col-span-1 flex"><Utensils className="mr-2 ml-1"/> 餐廳</div>
+                    <div className="col-span-2 flex"><MapPin className="mr-2 ml-1"/> 地址</div>
+                    <div className="col-span-1 flex"><Calendar className="mr-2"/> 日期</div>
+                    <div className="col-span-1 flex"><Clock className="mr-2"/> 時間</div>
+                    <div className="col-span-1 flex"><Users className="mr-2"/> 人數</div>
+                    <div className="col-span-1 flex"><Activity className="mr-2"/> 狀態</div>
+                    <div className="col-span-1 text-center flex"><Settings className="mr-2 ml-6"/> 操作</div>
                   </div>
                   
                   {/* 預約列表 */}
@@ -188,16 +199,16 @@ function UserDashboard( { showTemporaryAlert } ) {
                         {reservation.status === 'CANCELLED' && '取消'}
                       </span>
                       </div>
-                      <div className="col-span-1 flex justify-center space-x-2">
+                      <div className="col-span-1 flex justify-center space-x-2 mr-4">
                       <Dialog>
                       <DialogTrigger asChild>
                         <Button 
                           variant="outline"
                           size="sm"
-                          className="text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
+                          className="text-white hover:text-white bg-blue-500 hover:bg-blue-600 rounded-[8px]"
                           onClick={() => setSelectedReservation(reservation)}
                         >
-                          編輯
+                          <Edit className="mr-2 h-4 w-4" /> 編輯
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="sm:max-w-lg bg-white">
@@ -213,14 +224,14 @@ function UserDashboard( { showTemporaryAlert } ) {
                     <Button 
                       variant="outline"
                       size="sm"
-                      className="text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50"
+                      className="text-white hover:text-white bg-red-500 hover:bg-red-600 rounded-[8px]"
                       onClick={() => {
                         if (window.confirm('確定要取消此預約嗎？')) {
                           handleCancel(reservation.name, reservation.id)
                         }
                       }}
                     >
-                      取消
+                      <Trash2 className="mr-2 h-4 w-4" /> 刪除
                     </Button>
                   </div>
                 </div>
@@ -448,7 +459,7 @@ const EditBookingForm = ({ booking, showTemporaryAlert }) => {
         reservationTime: selectedTime,
         numberOfPeople: guests,
       };
-
+      console.log(reservationData);
       const apiResponse = await updateReservation(booking.id, reservationData);
       
       if (apiResponse.message === '預約更新成功!') {
@@ -456,8 +467,11 @@ const EditBookingForm = ({ booking, showTemporaryAlert }) => {
         if (closeButton) {
           closeButton.click();
         }
-        window.location.reload();
         showTemporaryAlert('更新成功', '預約資訊已成功更新!', 'check');
+
+        setTimeout(() => {
+          window.location.reload();
+        }, 10000);
       }
     } catch (error) {
       console.error('預約失敗:', error);
@@ -468,156 +482,160 @@ const EditBookingForm = ({ booking, showTemporaryAlert }) => {
   };
 
   return (
-    <form onSubmit={handleBooking} className="space-y-6 p-4">
-      <div className="space-y-6">
-        {/* 日期選擇 */}
-        <div className="space-y-2">
-          <h3 className="text-base pb-2 mb-4 border-b flex items-center">
-            <CalendarCheck className="mr-2" />
-            選擇日期
-          </h3>
-          <DayPicker
-            mode="single"
-            selected={selectedDate}
-            onSelect={(date) => {
-              setSelectedDate(date);
-              setSelectedTime(null);
-            }}
-            disabled={(date) => !isDateInRange(date)}
-            fromDate={new Date()}
-            toDate={availableDateRanges.reduce((maxDate, range) => {
-              const endDate = new Date(range.endDate);
-              return endDate > maxDate ? endDate : maxDate;
-            }, new Date())}
-            className="border rounded-lg"
-            styles={{
-              ...calendarStyles,
-              day_selected: (baseStyle) => ({
-                ...baseStyle,
-                ...calendarStyles.day_selected
-              }),
-              day_today: (baseStyle) => ({
-                ...baseStyle,
-                ...calendarStyles.day_today
-              })
-            }}
-            modifiersStyles={{
-              disabled: calendarStyles.day_disabled,
-              today: calendarStyles.day_today,
-              selected: calendarStyles.day_selected
-            }}
-          />
-        </div>
-
-        {/* 時間選擇 */}
-        <div className="space-y-2">
-          <h3 className="text-base pb-2 mb-4 border-b flex items-center">
-            <Clock className="mr-2" />
-            選擇時間
-          </h3>
-          <Select
-            value={selectedTime}
-            onValueChange={setSelectedTime}
-            disabled={!selectedDate || isLoading}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={isLoading ? "載入中..." : "請選擇時段"} />
-            </SelectTrigger>
-            <SelectContent>
-              {availableTimeSlots.map(slot => (
-                <SelectItem 
-                  key={slot.time} 
-                  value={slot.time}
-                  className="py-2 border-b last:border-b-0"
-                >
-                  {slot.time}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* 人數選擇 */}
-        <div className="space-y-2">
-          <h3 className="text-base pb-2 mb-4 border-b flex items-center">
-            <Users className="mr-2" />
-            用餐人數
-          </h3>
-          <Select
-            value={guests.toString()}
-            onValueChange={(value) => setGuests(parseInt(value))}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="選擇人數" />
-            </SelectTrigger>
-            <SelectContent>
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
-                <SelectItem 
-                  key={num} 
-                  value={num.toString()}
-                  className="py-2 border-b last:border-b-0"
-                >
-                  {num} 人
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* 預約信息確認 */}
-        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 shadow-sm">
-          <h3 className="text-base pb-2 mb-4 border-b flex items-center">
-            <ClipboardCheck className="mr-2" />
-            預約信息確認
-          </h3>
-          <div className="space-y-3">
-            <div className="flex items-center py-2 border-b">
-              <Store className="w-5 h-5 text-blue-500 mr-3" />
-              <span className="text-gray-500 w-20">餐廳</span>
-              <span className="text-gray-700 font-medium">{booking.name}</span>
+    <div className="flex flex-col h-[90vh]">
+      <div className="flex-1 overflow-y-auto px-4">
+        <form className="space-y-6">
+          <div className="space-y-6 pb-20">
+            {/* 日期選擇 */}
+            <div className="space-y-2">
+              <h3 className="text-base pb-2 mb-4 border-b flex items-center bg-white">
+                <CalendarCheck className="mr-2" />
+                選擇日期
+              </h3>
+              <DayPicker
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => {
+                  setSelectedDate(date);
+                  setSelectedTime(null);
+                }}
+                disabled={(date) => !isDateInRange(date)}
+                fromDate={new Date()}
+                toDate={availableDateRanges.reduce((maxDate, range) => {
+                  const endDate = new Date(range.endDate);
+                  return endDate > maxDate ? endDate : maxDate;
+                }, new Date())}
+                className="border rounded-lg"
+                styles={{
+                  ...calendarStyles,
+                  day_selected: (baseStyle) => ({
+                    ...baseStyle,
+                    ...calendarStyles.day_selected
+                  }),
+                  day_today: (baseStyle) => ({
+                    ...baseStyle,
+                    ...calendarStyles.day_today
+                  })
+                }}
+                modifiersStyles={{
+                  disabled: calendarStyles.day_disabled,
+                  today: calendarStyles.day_today,
+                  selected: calendarStyles.day_selected
+                }}
+              />
             </div>
-            
-            <div className="flex items-center py-2 border-b">
-              <CalendarCheck className="w-5 h-5 text-blue-500 mr-3" />
-              <span className="text-gray-500 w-20">日期</span>
-              <span className="text-gray-700 font-medium">
-                {selectedDate ? format(selectedDate, 'yyyy年MM月dd日') : '尚未選擇'}
-              </span>
+
+            {/* 時間選擇 */}
+            <div className="space-y-2">
+              <h3 className="text-base pb-2 mb-4 border-b flex items-center">
+                <Clock className="mr-2" />
+                選擇時間
+              </h3>
+              <Select
+                value={selectedTime}
+                onValueChange={setSelectedTime}
+                disabled={!selectedDate || isLoading}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={isLoading ? "載入中..." : "請選擇時段"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableTimeSlots.map(slot => (
+                    <SelectItem 
+                      key={slot.time} 
+                      value={slot.time}
+                      className="py-2 border-b last:border-b-0 bg-white"
+                    >
+                      {slot.time}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            
-            <div className="flex items-center py-2 border-b">
-              <Clock className="w-5 h-5 text-blue-500 mr-3" />
-              <span className="text-gray-500 w-20">時間</span>
-              <span className="text-gray-700 font-medium">
-                {selectedTime || '尚未選擇'}
-              </span>
+
+            {/* 人數選擇 */}
+            <div className="space-y-2">
+              <h3 className="text-base pb-2 mb-4 border-b flex items-center">
+                <Users className="mr-2" />
+                用餐人數
+              </h3>
+              <Select
+                value={guests.toString()}
+                onValueChange={(value) => setGuests(parseInt(value))}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="選擇人數" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                    <SelectItem 
+                      key={num} 
+                      value={num.toString()}
+                      className="py-2 border-b last:border-b-0 bg-white"
+                    >
+                      {num} 人
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            
-            <div className="flex items-center py-2 border-b">
-              <Users className="w-5 h-5 text-blue-500 mr-3" />
-              <span className="text-gray-500 w-20">人數</span>
-              <span className="text-gray-700 font-medium">{guests} 人</span>
+
+            {/* 預約信息確認 */}
+            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 shadow-sm">
+              <h3 className="text-base pb-2 mb-4 border-b flex items-center">
+                <ClipboardCheck className="mr-2" />
+                預約信息確認
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-center py-2 border-b">
+                  <Store className="w-5 h-5 text-blue-500 mr-3" />
+                  <span className="text-gray-500 w-20">餐廳</span>
+                  <span className="text-gray-700 font-medium">{booking.name}</span>
+                </div>
+                
+                <div className="flex items-center py-2 border-b">
+                  <CalendarCheck className="w-5 h-5 text-blue-500 mr-3" />
+                  <span className="text-gray-500 w-20">日期</span>
+                  <span className="text-gray-700 font-medium">
+                    {selectedDate ? format(selectedDate, 'yyyy年MM月dd日') : '尚未選擇'}
+                  </span>
+                </div>
+                
+                <div className="flex items-center py-2 border-b">
+                  <Clock className="w-5 h-5 text-blue-500 mr-3" />
+                  <span className="text-gray-500 w-20">時間</span>
+                  <span className="text-gray-700 font-medium">
+                    {selectedTime || '尚未選擇'}
+                  </span>
+                </div>
+                
+                <div className="flex items-center py-2 border-b">
+                  <Users className="w-5 h-5 text-blue-500 mr-3" />
+                  <span className="text-gray-500 w-20">人數</span>
+                  <span className="text-gray-700 font-medium">{guests} 人</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </form>
       </div>
 
-      {/* 按鈕 */}
-      <div className="flex justify-end space-x-2 pt-4 border-t">
+      {/* 固定在底部的按鈕 */}
+      <div className="bg-white border-t p-4 flex justify-end space-x-2">
         <DialogClose asChild>
-          <Button variant="outline" type="button">
+          <Button variant="outline" type="button" className='text-white bg-red-600 hover:bg-red-700 border-transparent'>
             取消
           </Button>
         </DialogClose>
         <Button
-          type="submit"
+          onClick={handleBooking}
           disabled={!selectedDate || !selectedTime || isLoading}
-          className="bg-blue-600 hover:bg-blue-700"
+          className="bg-blue-600 hover:bg-blue-700 text-white"
         >
           {isLoading ? '更新中...' : '確認修改'}
         </Button>
       </div>
-    </form>
+    </div>
   );
 };
 

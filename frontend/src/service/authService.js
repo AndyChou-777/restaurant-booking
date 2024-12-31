@@ -89,4 +89,3 @@ export const checkSession = async () => {
 
   return response.json();
 };
-

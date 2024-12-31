@@ -38,7 +38,6 @@ public class ReservationDTO {
     private LocalDate reservationDate;
     
     @NotNull(message = "預約時間不能為空")
-    @Future(message = "預約時間必須為未來的時間")
     private LocalTime reservationTime;
     
     @NotNull(message = "人數不能為空")

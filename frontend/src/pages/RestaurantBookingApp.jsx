@@ -8,7 +8,7 @@ import { getAllRestaurants } from '@/service/restaurantService';
 import { fetchAvailabilities, getAllAvailabilities } from '@/service/availabilityService';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { createReservation, getAvailabilities } from '@/service/reservationService';
-import { Search, UtensilsCrossed, CircleDollarSign, MapPin, Tag, DollarSign, Clock, Store, Utensils, SquarePen, CalendarFold, UsersRound, NotebookPen, ClipboardCheck, CalendarCheck, CalendarPlus, Users, } from 'lucide-react';
+import { Search, Eraser, UtensilsCrossed, CircleDollarSign, MapPin, Tag, DollarSign, Clock, Store, Utensils, SquarePen, CalendarFold, UsersRound, NotebookPen, ClipboardCheck, CalendarCheck, CalendarPlus, Users, } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
 import { format } from 'date-fns';
 import 'react-day-picker/dist/style.css';
@@ -174,7 +174,7 @@ function RestaurantBookingApp({ searchParams, setSearchParams, showTemporaryAler
               tag: '',
             })}
         >
-          清空條件
+          <Eraser /> 清空條件
         </Button>
       </div>
       

@@ -105,7 +105,7 @@ function App() {
 
       {/* Alert 控制組件 */}
       {showAlert && (
-        <Alert className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white text-black border border-black p-6 shadow-lg z-50 w-[500px] rounded-[8px] text-center">
+        <Alert className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white text-black border border-black p-6 shadow-lg z-100 w-[500px] rounded-[8px] text-center">
           <div className="flex items-center justify-center space-x-2"> {/* Flex container for icon and title */}
             {/* 動態傳入圖示 */}
             {alertContent.iconType === 'check' ? (

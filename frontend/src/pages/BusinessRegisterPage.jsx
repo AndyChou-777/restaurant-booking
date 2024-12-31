@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { registerBusinessUser } from '@/service/authService'
+import { Building2, Mails, LockKeyhole, ShieldCheck } from 'lucide-react';
 
-function BusinessRegisterPage() {
+function BusinessRegisterPage( {showTemporaryAlert} ) {
   const [isIntroPhase, setIsIntroPhase] = useState(true);
   const [businessName, setBusinessName] = useState('');
   const [email, setEmail] = useState('');
@@ -15,7 +16,7 @@ function BusinessRegisterPage() {
       e.preventDefault();
   
       if (password !== confirmPassword) {
-        alert("密碼確認不符，請重新輸入");
+        showTemporaryAlert('密碼錯誤', '密碼確認不符，請重新輸入!', 'error');
         return;
       }
   
@@ -23,14 +24,13 @@ function BusinessRegisterPage() {
         const data = await registerBusinessUser(businessName, email, password);
   
         if (data.message === "商業用戶註冊成功!") {
-          alert("企業用戶註冊成功!");
-          window.location.href = "/";
+          showTemporaryAlert('註冊成功', '企業用戶註冊成功，請登入後進行操作!', 'check', '/login');
         } else {
-          alert("企業用戶註冊成功!");
+          showTemporaryAlert('註冊失敗', '用戶註冊失敗，請重新註冊或稍後再試!', 'error');
         }
       } catch (error) {
         console.error("註冊錯誤:", error);
-        alert("伺服器錯誤，請稍後再試。");
+        showTemporaryAlert('伺服器錯誤', '伺服器或網路連接錯誤，請稍後再試!', 'error');
       }
     };
 
@@ -50,8 +50,8 @@ function BusinessRegisterPage() {
                   className="w-16 h-16 rounded-full bg-gray-200 p-2"
                 />
                 <div>
-                  <h3 className="text-xl font-semibold text-center mb-2">加曝光度</h3>
-                  <p>提升您的餐廳知名度和客源補字補字補字補</p>
+                  <h3 className="text-xl font-semibold text-center mb-2">高曝光度</h3>
+                  <p>掌握來自全球的用戶，顯著提升餐廳曝光度</p>
                 </div>
               </div>
               {/* 優勢 2 - 數據分析 */}
@@ -62,8 +62,8 @@ function BusinessRegisterPage() {
                   className="w-16 h-16 rounded-full bg-gray-200 p-2"
                 />
                 <div>
-                  <h3 className="text-xl font-semibold text-center mb-2">數據分析</h3>
-                  <p>顧客訂單和喜好分析優經營補字補字補字補</p>
+                  <h3 className="text-xl font-semibold text-center mb-2">輕鬆上架</h3>
+                  <p>無須任何額外費用，即可體驗完整平台功能</p>
                 </div>
               </div>
               {/* 優勢 3 - 客戶管理 */}
@@ -74,8 +74,8 @@ function BusinessRegisterPage() {
                   className="w-16 h-16 rounded-full bg-gray-200 p-2"
                 />
                 <div>
-                  <h3 className="text-xl font-semibold text-center mb-2">客戶管理</h3>
-                  <p>簡化訂單流程提升顧客體驗和忠誠度補字補</p>
+                  <h3 className="text-xl font-semibold text-center mb-2">一鍵管理</h3>
+                  <p>輕鬆管理所有旗下餐廳的資料、預約和狀態</p>
                 </div>
               </div>
             </div>
@@ -92,7 +92,10 @@ function BusinessRegisterPage() {
             <h2 className="text-2xl font-extrabold text-center text-gray-800">企業用戶註冊</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label>企業名稱</Label>
+                <Label className='flex text-black font-bold'>
+                  <Building2 />
+                  <p className='text-lg ml-2'>企業名稱</p>
+                </Label>
                 <Input
                   type="text"
                   value={businessName}
@@ -103,7 +106,10 @@ function BusinessRegisterPage() {
                 />
               </div>
               <div>
-                <Label>企業電子郵件</Label>
+                <Label className='flex text-black font-bold'>
+                  <Mails />
+                  <p className='text-lg ml-2'>企業信箱</p>
+                </Label>
                 <Input
                   type="email"
                   value={email}
@@ -114,7 +120,10 @@ function BusinessRegisterPage() {
                 />
               </div>
               <div>
-                <Label>密碼</Label>
+                <Label className='flex text-black font-bold'>
+                  <LockKeyhole />
+                  <p className='text-lg ml-2'>設定密碼</p>
+                </Label>
                 <Input
                   type="password"
                   value={password}
@@ -126,7 +135,10 @@ function BusinessRegisterPage() {
                 />
               </div>
               <div>
-                <Label>確認密碼</Label>
+                <Label className='flex text-black font-bold'>
+                  <ShieldCheck />
+                  <p className='text-lg ml-2'>確認密碼</p>
+                </Label>
                 <Input
                   type="password"
                   value={confirmPassword}

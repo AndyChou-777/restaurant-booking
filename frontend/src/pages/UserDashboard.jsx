@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { User, ShoppingCart, Bell, Settings } from "lucide-react"
+import { User, ShoppingCart, Bell, Settings, Store, CalendarCheck, Clock, Users, ClipboardCheck } from "lucide-react"
 import { checkSession } from "@/service/authService"
 import { useNavigate } from "react-router-dom"
 import { getUserReservations, getAvailabilities, updateReservation, cancelReservation } from "@/service/reservationService"
@@ -31,8 +31,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getAllAvailabilities } from "@/service/availabilityService"
+import { format } from 'date-fns';
+import { DayPicker } from 'react-day-picker';
 
-function UserDashboard() {
+function UserDashboard( { showTemporaryAlert } ) {
   const [userData, setUserData] = useState(null)
   const [editData, setEditData] = useState({ name: "", email: "" })
   const [activeTab, setActiveTab] = useState("orders")
@@ -60,14 +62,12 @@ function UserDashboard() {
         const apiResponse = await checkSession(); // 使用判斷是否已登入服務方法
         if (apiResponse.message === "登入成功") {
           if (apiResponse.data.role === "BUSINESS_USER") {
-            alert("請先登出後，改用企業帳號登入!");
-            navigate('/');
+            showTemporaryAlert('身分錯誤', '請先登出後，改用企業帳號登入!', 'error', '/login');
           }
         } 
       } catch (error) {
         console.error("無法檢查登入狀態:", error);
-        alert("使用者未登入，請先登入以進行操作!");
-        navigate('/login');
+        showTemporaryAlert('使用者未登入', '使用者未登入，請先登入以進行操作!', 'error', '/login');
       }
     };
 
@@ -87,8 +87,10 @@ function UserDashboard() {
       const apiResponse = await cancelReservation(id);
 
       if (apiResponse.message === '預約取消成功!') {
-        alert(`${name} 預約取消成功!`)
-        window.location.reload()
+        showTemporaryAlert('預約取消', `${name} 預約取消成功!`, 'check')
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
       }
     } catch (error) {
       console.error(error.message)
@@ -204,6 +206,7 @@ function UserDashboard() {
                         </DialogHeader>
                         <EditBookingForm 
                           booking={reservation}
+                          showTemporaryAlert={showTemporaryAlert}
                         />
                       </DialogContent>
                     </Dialog>
@@ -226,22 +229,7 @@ function UserDashboard() {
               </CardContent>
             </Card>
           )
-      case "notifications":
-        return (
-          <Card className="bg-white text-black shadow-lg hover:shadow-2xl transition-all duration-300">
-            <CardHeader>
-              <CardTitle>通知</CardTitle>
-              <CardDescription>您的最新消息</CardDescription>
-            </CardHeader>
-            <CardContent>
-             
-                <div className="p-3 border-b last:border-b-0 hover:bg-gray-100 transition-all duration-200">
-                  留白
-                </div>
-            
-            </CardContent>
-          </Card>
-        )
+
       default:
         return null
     }
@@ -254,13 +242,7 @@ function UserDashboard() {
       {/* 側邊欄 */}
       <div className="w-64 border-r bg-gray-800 p-4">
         <div className="space-y-4">
-          <button 
-            className={`flex items-center space-x-3 p-3 w-full text-left rounded-lg ${activeTab === "profile" ? "bg-blue-600" : "hover:bg-gray-600"}`}
-            onClick={() => setActiveTab("profile")}
-          >
-            <User className="h-5 w-5 text-gray-300" />
-            <span className="text-gray-300">個人資料</span>
-          </button>
+          
           <button 
             className={`flex items-center space-x-3 p-3 w-full text-left rounded-lg ${activeTab === "orders" ? "bg-blue-600" : "hover:bg-gray-600"}`}
             onClick={() => setActiveTab("orders")}
@@ -268,12 +250,13 @@ function UserDashboard() {
             <ShoppingCart className="h-5 w-5 text-gray-300" />
             <span className="text-gray-300">預約資訊</span>
           </button>
+          
           <button 
-            className={`flex items-center space-x-3 p-3 w-full text-left rounded-lg ${activeTab === "notifications" ? "bg-blue-600" : "hover:bg-gray-600"}`}
-            onClick={() => setActiveTab("notifications")}
+            className={`flex items-center space-x-3 p-3 w-full text-left rounded-lg ${activeTab === "profile" ? "bg-blue-600" : "hover:bg-gray-600"}`}
+            onClick={() => setActiveTab("profile")}
           >
-            <Bell className="h-5 w-5 text-gray-300" />
-            <span className="text-gray-300">通知</span>
+            <User className="h-5 w-5 text-gray-300" />
+            <span className="text-gray-300">個人資料</span>
           </button>
   
         </div>
@@ -287,7 +270,7 @@ function UserDashboard() {
   )
 }
 
-const EditBookingForm = ({ booking, onSubmit, onCancel }) => {
+const EditBookingForm = ({ booking, showTemporaryAlert }) => {
   const [selectedDate, setSelectedDate] = useState(booking?.date ? new Date(booking.date) : null);
   const [selectedTime, setSelectedTime] = useState(booking?.time || '');
   const [availableDateRanges, setAvailableDateRanges] = useState([]);
@@ -295,13 +278,89 @@ const EditBookingForm = ({ booking, onSubmit, onCancel }) => {
   const [guests, setGuests] = useState(booking?.numberOfPeople || 1);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 在組件載入時獲取可用日期範圍
+  // Calendar styles
+  const calendarStyles = {
+    calendar: {
+      width: '400px',
+      maxWidth: '100%',
+      backgroundColor: '#fff',
+      color: '#222',
+      borderRadius: '8px',
+      boxShadow: '0 12px 24px rgba(0, 0, 0, 0.2)',
+      fontFamily: 'Arial, Helvetica, sans-serif',
+      lineHeight: '1.125em',
+      padding: '1rem'
+    },
+    caption: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      padding: '0.5rem',
+      alignItems: 'center'
+    },
+    caption_label: {
+      fontSize: '1rem',
+      fontWeight: 'bold'
+    },
+    nav: {
+      display: 'flex',
+      gap: '0.5rem'
+    },
+    nav_button: {
+      color: '#0047AB',
+      minWidth: '44px',
+      background: 'none',
+      fontSize: '16px',
+      padding: '4px',
+      cursor: 'pointer'
+    },
+    table: {
+      width: '100%',
+      borderCollapse: 'collapse'
+    },
+    head_cell: {
+      padding: '0.5rem',
+      textAlign: 'center',
+      fontWeight: 'normal',
+      fontSize: '0.875rem',
+      color: '#1E3A8A'
+    },
+    cell: {
+      padding: '0.25rem',
+      textAlign: 'center'
+    },
+    day: {
+      width: '40px',
+      height: '40px',
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      margin: '2px',
+      border: 'none',
+      background: 'none'
+    },
+    day_today: {
+      backgroundColor: '#1E3A8A33',
+      fontWeight: 'bold',
+      color: '#1E3A8A'
+    },
+    day_selected: {
+      backgroundColor: '#003366',
+      color: 'white',
+      fontWeight: 'bold'
+    },
+    day_disabled: {
+      opacity: 0.5,
+      cursor: 'not-allowed'
+    }
+  };
+
   useEffect(() => {
     const fetchAvailableDates = async () => {
       setIsLoading(true);
       try {
         const apiResponse = await getAllAvailabilities(booking.restaurantId);
-
         if (apiResponse.status === 200 && apiResponse.data) {
           const ranges = apiResponse.data.map(range => ({
             startDate: new Date(range.startDate),
@@ -310,7 +369,6 @@ const EditBookingForm = ({ booking, onSubmit, onCancel }) => {
             endTime: range.endTime
           }));
           setAvailableDateRanges(ranges);
-          console.log('Parsed date ranges:', ranges);
         }
       } catch (error) {
         console.error('獲取可用日期失敗:', error);
@@ -321,7 +379,6 @@ const EditBookingForm = ({ booking, onSubmit, onCancel }) => {
     fetchAvailableDates();
   }, [booking.restaurantId]);
 
-  // 當選擇日期時獲取可用時段
   useEffect(() => {
     const fetchAvailableTimes = async () => {
       if (!selectedDate) return;
@@ -339,7 +396,6 @@ const EditBookingForm = ({ booking, onSubmit, onCancel }) => {
             disabled: false
           }));
           setAvailableTimeSlots(slots);
-          // 重置選擇的時間
           setSelectedTime('');
         } else {
           setAvailableTimeSlots([]);
@@ -354,7 +410,6 @@ const EditBookingForm = ({ booking, onSubmit, onCancel }) => {
     fetchAvailableTimes();
   }, [selectedDate, booking.restaurantId]);
 
-  // 檢查日期是否在可用範圍內
   const isDateInRange = (date) => {
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
@@ -377,13 +432,12 @@ const EditBookingForm = ({ booking, onSubmit, onCancel }) => {
   };
 
   const handleBooking = async (e) => {
-    e.preventDefault(); // 阻止表單默認提交行為
+    e.preventDefault();
     
     if (!selectedDate || !selectedTime) return;
     
     setIsLoading(true);
     try {
-      // 處理日期時區問題
       const formattedDate = new Date(selectedDate.getTime() - (selectedDate.getTimezoneOffset() * 60000))
         .toISOString()
         .split('T')[0];
@@ -394,21 +448,16 @@ const EditBookingForm = ({ booking, onSubmit, onCancel }) => {
         reservationTime: selectedTime,
         numberOfPeople: guests,
       };
-  
-      console.log('Sending reservation data:', reservationData);
-      console.log('Sending reservation Id:', booking.id);
 
       const apiResponse = await updateReservation(booking.id, reservationData);
       
-      if (apiResponse.status === 200) {
-        alert('預約更新成功！');
-        // 關閉對話框
+      if (apiResponse.message === '預約更新成功!') {
         const closeButton = document.querySelector('[data-dialog-close]');
         if (closeButton) {
           closeButton.click();
         }
-        // 重新載入預約資料
         window.location.reload();
+        showTemporaryAlert('更新成功', '預約資訊已成功更新!', 'check');
       }
     } catch (error) {
       console.error('預約失敗:', error);
@@ -419,85 +468,151 @@ const EditBookingForm = ({ booking, onSubmit, onCancel }) => {
   };
 
   return (
-    <form onSubmit={handleBooking} className="space-y-6">
-      <div className="space-y-2">
-        <label className="block text-sm font-medium">選擇日期</label>
-        <Calendar
-          mode="single"
-          selected={selectedDate}
-          onSelect={setSelectedDate}
-          className="rounded-md border"
-          disabled={(date) => !isDateInRange(date)}
-          fromDate={new Date()}
-          toDate={availableDateRanges.reduce((maxDate, range) => {
-            const endDate = new Date(range.endDate);
-            return endDate > maxDate ? endDate : maxDate;
-          }, new Date())} 
-        />
+    <form onSubmit={handleBooking} className="space-y-6 p-4">
+      <div className="space-y-6">
+        {/* 日期選擇 */}
+        <div className="space-y-2">
+          <h3 className="text-base pb-2 mb-4 border-b flex items-center">
+            <CalendarCheck className="mr-2" />
+            選擇日期
+          </h3>
+          <DayPicker
+            mode="single"
+            selected={selectedDate}
+            onSelect={(date) => {
+              setSelectedDate(date);
+              setSelectedTime(null);
+            }}
+            disabled={(date) => !isDateInRange(date)}
+            fromDate={new Date()}
+            toDate={availableDateRanges.reduce((maxDate, range) => {
+              const endDate = new Date(range.endDate);
+              return endDate > maxDate ? endDate : maxDate;
+            }, new Date())}
+            className="border rounded-lg"
+            styles={{
+              ...calendarStyles,
+              day_selected: (baseStyle) => ({
+                ...baseStyle,
+                ...calendarStyles.day_selected
+              }),
+              day_today: (baseStyle) => ({
+                ...baseStyle,
+                ...calendarStyles.day_today
+              })
+            }}
+            modifiersStyles={{
+              disabled: calendarStyles.day_disabled,
+              today: calendarStyles.day_today,
+              selected: calendarStyles.day_selected
+            }}
+          />
+        </div>
+
+        {/* 時間選擇 */}
+        <div className="space-y-2">
+          <h3 className="text-base pb-2 mb-4 border-b flex items-center">
+            <Clock className="mr-2" />
+            選擇時間
+          </h3>
+          <Select
+            value={selectedTime}
+            onValueChange={setSelectedTime}
+            disabled={!selectedDate || isLoading}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={isLoading ? "載入中..." : "請選擇時段"} />
+            </SelectTrigger>
+            <SelectContent>
+              {availableTimeSlots.map(slot => (
+                <SelectItem 
+                  key={slot.time} 
+                  value={slot.time}
+                  className="py-2 border-b last:border-b-0"
+                >
+                  {slot.time}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* 人數選擇 */}
+        <div className="space-y-2">
+          <h3 className="text-base pb-2 mb-4 border-b flex items-center">
+            <Users className="mr-2" />
+            用餐人數
+          </h3>
+          <Select
+            value={guests.toString()}
+            onValueChange={(value) => setGuests(parseInt(value))}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="選擇人數" />
+            </SelectTrigger>
+            <SelectContent>
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                <SelectItem 
+                  key={num} 
+                  value={num.toString()}
+                  className="py-2 border-b last:border-b-0"
+                >
+                  {num} 人
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* 預約信息確認 */}
+        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 shadow-sm">
+          <h3 className="text-base pb-2 mb-4 border-b flex items-center">
+            <ClipboardCheck className="mr-2" />
+            預約信息確認
+          </h3>
+          <div className="space-y-3">
+            <div className="flex items-center py-2 border-b">
+              <Store className="w-5 h-5 text-blue-500 mr-3" />
+              <span className="text-gray-500 w-20">餐廳</span>
+              <span className="text-gray-700 font-medium">{booking.name}</span>
+            </div>
+            
+            <div className="flex items-center py-2 border-b">
+              <CalendarCheck className="w-5 h-5 text-blue-500 mr-3" />
+              <span className="text-gray-500 w-20">日期</span>
+              <span className="text-gray-700 font-medium">
+                {selectedDate ? format(selectedDate, 'yyyy年MM月dd日') : '尚未選擇'}
+              </span>
+            </div>
+            
+            <div className="flex items-center py-2 border-b">
+              <Clock className="w-5 h-5 text-blue-500 mr-3" />
+              <span className="text-gray-500 w-20">時間</span>
+              <span className="text-gray-700 font-medium">
+                {selectedTime || '尚未選擇'}
+              </span>
+            </div>
+            
+            <div className="flex items-center py-2 border-b">
+              <Users className="w-5 h-5 text-blue-500 mr-3" />
+              <span className="text-gray-500 w-20">人數</span>
+              <span className="text-gray-700 font-medium">{guests} 人</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-2">
-        <label className="block text-sm font-medium">選擇時間</label>
-        <Select 
-          value={selectedTime} 
-          onValueChange={setSelectedTime}
-          disabled={!selectedDate || isLoading}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder={isLoading ? "載入中..." : "請選擇時段"} />
-          </SelectTrigger>
-          <SelectContent>
-            {availableTimeSlots.map(slot => (
-              <SelectItem key={slot.time} value={slot.time}>
-                {slot.time}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <label className="block text-sm font-medium">用餐人數</label>
-        <Select 
-          value={guests.toString()} 
-          onValueChange={(value) => setGuests(parseInt(value))}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="選擇人數" />
-          </SelectTrigger>
-          <SelectContent>
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
-              <SelectItem key={num} value={num.toString()}>
-                {num} 人
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <h3 className="text-sm font-medium">預約確認訊息</h3>
-        <p className="text-sm text-gray-500">
-          {selectedDate && selectedTime ? (
-            <>
-              您選擇的預約時間是 {selectedDate.toLocaleDateString()} {selectedTime}，
-              用餐人數 {guests} 人
-            </>
-          ) : (
-            '請選擇預約日期和時間'
-          )}
-        </p>
-      </div>
-
-      <div className="flex justify-end space-x-2">
+      {/* 按鈕 */}
+      <div className="flex justify-end space-x-2 pt-4 border-t">
         <DialogClose asChild>
-          <Button type="button" variant="outline">
+          <Button variant="outline" type="button">
             取消
           </Button>
         </DialogClose>
-        <Button 
+        <Button
           type="submit"
           disabled={!selectedDate || !selectedTime || isLoading}
+          className="bg-blue-600 hover:bg-blue-700"
         >
           {isLoading ? '更新中...' : '確認修改'}
         </Button>

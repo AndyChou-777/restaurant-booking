@@ -13,7 +13,7 @@ import RestaurantBookingApp from './pages/RestaurantBookingApp';
 import 'tailwindcss/tailwind.css'; // 引入 tailwindcss
 import { useState, useEffect } from 'react';
 import { checkSession, logout, login} from './service/authService';
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, CircleCheckBig, OctagonAlert } from "lucide-react"
 import {
   Alert,
   AlertDescription,
@@ -23,7 +23,7 @@ import {
 function App() {
 
   const [showAlert, setShowAlert] = useState(false);
-  const [alertContent, setAlertContent] = useState({ title: '', description: '' });
+  const [alertContent, setAlertContent] = useState({ title: '', description: '' , iconType: ''});
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState('');
@@ -49,7 +49,7 @@ function App() {
 
     } catch (error) {
       console.error("無法檢查登入狀態:", error);
-      alert("無法連接到伺服器，請檢查網路連線或伺服器狀態。");
+      showTemporaryAlert('伺服器錯誤', '無法連接到伺服器，請檢查網路連線或伺服器狀態。', 'error');
     }
   };
 
@@ -63,17 +63,15 @@ function App() {
       if (apiResponse.data.role === 'GENERAL_USER') {
         setIsLoggedIn(true);
         setUserRole('GENERAL_USER');
-        alert('登入成功!');
-        window.location.href = '/user/dashboard' ;
+        showTemporaryAlert('登入成功', '用戶成功登入，即將跳轉至用戶管理頁面!', 'check', '/user/dashboard');
       } else if (apiResponse.data.role === 'BUSINESS_USER') {
         setIsLoggedIn(true);
         setUserRole('BUSINESS_USER');
-        alert('登入成功!');
-        window.location.href = '/business/dashboard';
+        showTemporaryAlert('登入成功', '用戶成功登入，即將跳轉至企業用戶管理頁面!', 'check', '/business/dashboard');
       }
     } catch (error) {
       console.error(error.message || '登入失敗');
-      alert('登入失敗，請檢查帳號密碼!');
+      showTemporaryAlert('登入失敗', '請檢查帳號密碼是否有誤!', 'error');
     }
   };
 
@@ -87,8 +85,8 @@ function App() {
     }
   };
 
-  const showTemporaryAlert = (title, description, redirect) => {  // 添加 redirect 參數，預設跳轉到首頁
-    setAlertContent({ title, description });
+  const showTemporaryAlert = (title, description, iconType, redirect) => {  // 添加 redirect 參數，預設跳轉到首頁
+    setAlertContent({ title, description, iconType });
     setShowAlert(true);
   
     setTimeout(() => {
@@ -107,10 +105,19 @@ function App() {
 
       {/* Alert 控制組件 */}
       {showAlert && (
-        <Alert className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white text-black border border-black p-4 shadow-lg z-50 w-[500px] rounded-[8px]">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle className='font-bold'>{alertContent.title}</AlertTitle>
-          <AlertDescription>
+        <Alert className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white text-black border border-black p-6 shadow-lg z-50 w-[500px] rounded-[8px] text-center">
+          <div className="flex items-center justify-center space-x-2"> {/* Flex container for icon and title */}
+            {/* 動態傳入圖示 */}
+            {alertContent.iconType === 'check' ? (
+              <CircleCheckBig className="h-5 w-5 mb-1.5 text-green-600" />
+            ) : alertContent.iconType === 'error' ? (
+              <OctagonAlert className="h-5 w-5 mb-1.5 text-red-800" />
+            ) : (
+              <AlertCircle className="h-5 w-5" />
+            )}
+            <AlertTitle className="font-bold text-lg">{alertContent.title}</AlertTitle>
+          </div>
+          <AlertDescription className="text-base">
             {alertContent.description}
           </AlertDescription>
         </Alert>
@@ -122,9 +129,9 @@ function App() {
         <Routes>
           <Route path="/" element={<Home searchParams={searchParams} setSearchParams={setSearchParams} />} />
           <Route path="/login" element={<LoginPage handleLogin={handleLogin} />} />
-          <Route path="/register/user" element={<UserRegisterPage />} />
-          <Route path="/register/business" element={<BusinessRegisterPage />} />
-          <Route path="/user/dashboard" element={<UserDashboard />} />
+          <Route path="/register/user" element={<UserRegisterPage showTemporaryAlert={showTemporaryAlert} />}  />
+          <Route path="/register/business" element={<BusinessRegisterPage showTemporaryAlert={showTemporaryAlert} />} />
+          <Route path="/user/dashboard" element={<UserDashboard showTemporaryAlert={showTemporaryAlert} />} />
           <Route path="/business/dashboard" element={<BusinessDashboard />} />
           <Route path="/restaurant-reservation" element={<RestaurantBookingApp searchParams={searchParams} setSearchParams={setSearchParams} showTemporaryAlert={showTemporaryAlert} />} />
         </Routes>

@@ -66,7 +66,7 @@ function Header( {isLoggedIn, userRole, handleLogout, showTemporaryAlert} ) {
            onClick={(e) => {
             e.preventDefault();
             handleLogout();
-            showTemporaryAlert('登出成功', '用戶登出成功', '/');  // 指定跳轉到首頁
+            showTemporaryAlert('登出成功', '用戶登出成功!', 'check', '/');  // 指定跳轉到首頁
           }}>
             當您完成使用網站時，可以隨時選擇登出。登出後，您的帳戶資料將會保護，避免他人查看或修改您的資料。
             記得在公共電腦或其他設備上登出，確保資料安全。

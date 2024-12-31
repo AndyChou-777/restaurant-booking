@@ -8,7 +8,10 @@ import { getAllRestaurants } from '@/service/restaurantService';
 import { fetchAvailabilities, getAllAvailabilities } from '@/service/availabilityService';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { createReservation, getAvailabilities } from '@/service/reservationService';
-import { Search, UtensilsCrossed, CircleDollarSign, MapPin, Tag, DollarSign, Clock, Image} from 'lucide-react';
+import { Search, UtensilsCrossed, CircleDollarSign, MapPin, Tag, DollarSign, Clock, Store, Utensils, SquarePen, CalendarFold, UsersRound, NotebookPen, ClipboardCheck, CalendarCheck, CalendarPlus, Users, } from 'lucide-react';
+import { DayPicker } from 'react-day-picker';
+import { format } from 'date-fns';
+import 'react-day-picker/dist/style.css';
 
 function RestaurantBookingApp({ searchParams, setSearchParams, showTemporaryAlert }) {
   const [restaurants, setRestaurants] = useState([]);
@@ -19,7 +22,6 @@ function RestaurantBookingApp({ searchParams, setSearchParams, showTemporaryAler
       try {
         const apiResponse = await getAllRestaurants();
         if (apiResponse.message === '餐廳獲取成功') {
-          // First, format the basic restaurant data
           const formattedRestaurants = apiResponse.data.map(restaurant => ({
             id: restaurant.id,
             name: restaurant.name,
@@ -30,18 +32,30 @@ function RestaurantBookingApp({ searchParams, setSearchParams, showTemporaryAler
             priceRange: restaurant.averageSpending,
             location: restaurant.address,
             description: restaurant.description,
-            availableTimes: ['載入中...']
+            availableTimes: []
           }));
 
           setRestaurants(formattedRestaurants);
 
+          // 獲取今天的日期
+          const today = new Date();
+          const formattedDate = today.toISOString().split('T')[0];
+
           const restaurantsWithTimes = await Promise.all(
             formattedRestaurants.map(async (restaurant) => {
-              const times = await getAvailableTimes(restaurant.id);
-              return {
-                ...restaurant,
-                availableTimes: times
-              };
+              try {
+                const availabilityResponse = await getAvailabilities(restaurant.id, formattedDate);
+                return {
+                  ...restaurant,
+                  availableTimes: availabilityResponse.status === 200 ? availabilityResponse.data : []
+                };
+              } catch (error) {
+                console.error(`無法獲取餐廳 ${restaurant.id} 的可用時段:`, error);
+                return {
+                  ...restaurant,
+                  availableTimes: []
+                };
+              }
             })
           );
 
@@ -54,62 +68,6 @@ function RestaurantBookingApp({ searchParams, setSearchParams, showTemporaryAler
     
     loadRestaurants();
   }, []);
-
-  // 從時間段生成可預約時間
-  const getAvailableTimes = async (restaurantId) => {
-    try {
-      const apiResponse = await fetchAvailabilities(restaurantId);
-      if (!apiResponse || !apiResponse.data || apiResponse.data.length === 0) {
-        return ['暫無可預約時段'];
-      }
-  
-      const timeSlots = apiResponse.data;
-      const times = [];
-      
-      // 獲取當前時間
-      const now = new Date();
-      const currentHour = now.getHours();
-      const currentMinute = now.getMinutes();
-      const currentTotalMinutes = currentHour * 60 + currentMinute;
-  
-      timeSlots.forEach(slot => {
-        if (slot.startTime && slot.endTime) {
-          const [startHour, startMinute] = slot.startTime.split(':').map(num => parseInt(num));
-          const [endHour, endMinute] = slot.endTime.split(':').map(num => parseInt(num));
-  
-          const startTotalMinutes = startHour * 60 + startMinute;
-          const endTotalMinutes = endHour * 60 + endMinute;
-  
-          // 生成時間段並過濾過去的時間
-          for (let minutes = startTotalMinutes; minutes < endTotalMinutes; minutes += 30) {
-            // 檢查是否是未來時間
-            if (minutes > currentTotalMinutes) {
-              const hour = Math.floor(minutes / 60);
-              const minute = minutes % 60;
-              
-              const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-              times.push(timeString);
-            }
-          }
-  
-          // 添加結束時間（如果是未來時間且在30分鐘間隔上）
-          if (endTotalMinutes > currentTotalMinutes && (endMinute === 0 || endMinute === 30)) {
-            times.push(`${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`);
-          }
-        }
-      });
-  
-      // 如果沒有可用時間段，返回提示信息
-      if (times.length === 0) {
-        return ['今日已無可預約時段'];
-      }
-  
-      return [...new Set(times)].sort();
-    } catch (error) {
-      console.error("無法加載可預約時間:", error);
-      return ['暫無可預約時段'];
-    }
-  };
 
   const filteredRestaurants = restaurants.filter(restaurant => {
     const matchesKeyword = searchParams.keyword === '' || 
@@ -207,7 +165,7 @@ function RestaurantBookingApp({ searchParams, setSearchParams, showTemporaryAler
           onChange={(e) => setSearchParams({...searchParams, tag: e.target.value})}
         /> 
 
-        <Button className="mt-3 w-full font-bold py-2 text-white bg-gradient-to-r from-gray-900 to-gray-600 hover:fromgray-800 hover:to-gray-500 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+        <Button className="mt-6 w-full font-bold py-2 text-white bg-gradient-to-r from-amber-900 to-amber-700 hover:fromgray-800 hover:to-amber-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
         onClick={() => setSearchParams({
               keyword: '',
               minPrice: null,
@@ -238,7 +196,11 @@ function RestaurantBookingApp({ searchParams, setSearchParams, showTemporaryAler
               </div>
               
               <div className="p-4">
-                <h3 className="text-xl font-bold text-gray-800 mb-2 font-serif">{restaurant.name}</h3>
+                
+                <h3 className="text-xl font-bold text-gray-800 mb-2 font-serif flex">
+                  <Utensils className="mr-2" />
+                  <span>{restaurant.name}</span>
+                </h3>
                 
                 <div className="flex items-center text-gray-600 mb-2">
                   <MapPin size={16} className="mr-1" />
@@ -260,17 +222,20 @@ function RestaurantBookingApp({ searchParams, setSearchParams, showTemporaryAler
                 </div>
 
                 <div className="border-t pt-3">
-                  <h4 className="flex items-center font-medium text-black font-bold mb-2">
+                  <h4 className="flex items-center text-black font-bold mb-2">
                     <Clock size={16} className="mr-2" />
                     當日可預約時段
                   </h4>
                   <div className="flex flex-wrap gap-2">
-                    {Array.isArray(restaurant.availableTimes) && 
+                    {restaurant.availableTimes && restaurant.availableTimes.length > 0 ? (
                       restaurant.availableTimes.slice(0, 12).map(time => (
                         <span key={time} className="bg-blue-400 text-white text-xs px-2 py-1 rounded-full">
                           {time}
                         </span>
-                      ))}
+                      ))
+                    ) : (
+                      <span className="text-gray-500 text-sm mt-4 mb-5">今日已無可預約時段</span>
+                    )}
                   </div>
                 </div>
 
@@ -294,6 +259,82 @@ function BookingDialog({ restaurant, showTemporaryAlert }) {
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const calendarStyles = {
+    calendar: {
+      width: '400px',
+      maxWidth: '100%',
+      backgroundColor: '#fff',
+      color: '#222',
+      borderRadius: '8px',
+      boxShadow: '0 12px 24px rgba(0, 0, 0, 0.2)',
+      fontFamily: 'Arial, Helvetica, sans-serif',
+      lineHeight: '1.125em',
+      padding: '1rem'
+    },
+    caption: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      padding: '0.5rem',
+      alignItems: 'center'
+    },
+    caption_label: {
+      fontSize: '1rem',
+      fontWeight: 'bold'
+    },
+    nav: {
+      display: 'flex',
+      gap: '0.5rem'
+    },
+    nav_button: {
+      color: '#0047AB',
+      minWidth: '44px',
+      background: 'none',
+      fontSize: '16px',
+      padding: '4px',
+      cursor: 'pointer'
+    },
+    table: {
+      width: '100%',
+      borderCollapse: 'collapse'
+    },
+    head_cell: {
+      padding: '0.5rem',
+      textAlign: 'center',
+      fontWeight: 'normal',
+      fontSize: '0.875rem',
+      color: '#1E3A8A'
+    },
+    cell: {
+      padding: '0.25rem',
+      textAlign: 'center'
+    },
+    day: {
+      width: '40px',
+      height: '40px',
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      margin: '2px',
+      border: 'none',
+      background: 'none'
+    },
+    day_today: {
+      backgroundColor: '#1E3A8A33',
+      fontWeight: 'bold',
+      color: '#1E3A8A'
+    },
+    day_selected: {
+      backgroundColor: '#003366',
+      color: 'white',
+      fontWeight: 'bold'
+    },
+    day_disabled: {
+      opacity: 0.5,
+      cursor: 'not-allowed'
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -401,7 +442,7 @@ function BookingDialog({ restaurant, showTemporaryAlert }) {
     } catch (error) {
       console.error('預約失敗:', error);
       setIsOpen(false)
-      showTemporaryAlert('預約失敗', '用戶尚未登入或登入錯誤!', '/');
+      showTemporaryAlert('預約失敗', '用戶尚未登入或登入錯誤!', 'error', '/login');
     }
   };
 
@@ -411,7 +452,10 @@ function BookingDialog({ restaurant, showTemporaryAlert }) {
 
     return (
       <div className="space-y-2">
-        <h3 className="text-sm font-medium">選擇時段</h3>
+        <h3 className="text-base pb-2 mb-4 border-b flex">
+          <Clock className='mr-2' />
+          選擇時段
+        </h3>
         <Select
           value={selectedTime}
           onValueChange={setSelectedTime}
@@ -420,7 +464,7 @@ function BookingDialog({ restaurant, showTemporaryAlert }) {
           <SelectTrigger className="w-full">
             <SelectValue placeholder={isLoading ? "載入中..." : "請選擇時間"} />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white">
             {isLoading ? (
               <SelectItem value="loading">載入中...</SelectItem>
             ) : availableTimeSlots.length > 0 ? (
@@ -428,6 +472,7 @@ function BookingDialog({ restaurant, showTemporaryAlert }) {
                 <SelectItem
                   key={slot.time}
                   value={slot.time}
+                  className="border-b py-2"
                 >
                   {slot.time}
                 </SelectItem>
@@ -446,34 +491,56 @@ function BookingDialog({ restaurant, showTemporaryAlert }) {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
           <Button className="mt-3 w-full text-white font-bold bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 shadow-lg shadow-blue-500/20 hover:shadow-blue-600/30 transition-all duration-300">
+            <SquarePen />
             預約餐廳
           </Button>
         </DialogTrigger>
         
-        <DialogContent className="bg-white border border-gray-200 shadow-lg">
+        <DialogContent className="bg-white border border-gray-200 shadow-lg max-h-[90vh] w-full flex flex-col">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-gray-800">
-              預約 {restaurant.name}
+            <DialogTitle className="text-2xl font-semibold text-gray-800 flex justify-center items-center pt-2">
+              <NotebookPen className='mr-2'/>
+              預約{restaurant.name}
             </DialogTitle>
           </DialogHeader>
-          
+
+          <div className="flex-1 overflow-y-auto">
           <div className="space-y-6 p-4">
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">選擇日期</h3>
-              <Calendar
+            <div className="space-y-2 ">
+              <h3 className="text-base pb-2 mb-4 border-b flex sticky top-0 bg-white z-10">
+                <CalendarFold className='mr-2'/>
+                選擇日期
+              </h3>
+              <DayPicker
                 mode="single"
                 selected={selectedDate}
                 onSelect={(date) => {
                   setSelectedDate(date);
-                  setSelectedTime(null); // 重置時間選擇
+                  setSelectedTime(null);
                 }}
                 disabled={(date) => !isDateInRange(date)}
-                className="rounded-lg border border-gray-300"
                 fromDate={new Date()}
                 toDate={availableDateRanges.reduce((maxDate, range) => {
                   const endDate = new Date(range.endDate);
                   return endDate > maxDate ? endDate : maxDate;
                 }, new Date())}
+                className='border'
+                styles={{
+                  ...calendarStyles,
+                  day_selected: (baseStyle) => ({
+                    ...baseStyle,
+                    ...calendarStyles.day_selected
+                  }),
+                  day_today: (baseStyle) => ({
+                    ...baseStyle,
+                    ...calendarStyles.day_today
+                  })
+                }}
+                modifiersStyles={{
+                  disabled: calendarStyles.day_disabled,
+                  today: calendarStyles.day_today,
+                  selected: calendarStyles.day_selected
+                }}
               />
             </div>
 
@@ -481,23 +548,68 @@ function BookingDialog({ restaurant, showTemporaryAlert }) {
 
             {/* 人數輸入 */}
             <div>
-              <h3 className="text-sm font-medium">輸入人數</h3>
+              <h3 className="text-base pb-2 mb-4 border-b flex sticky top-0 bg-white z-10">
+                <UsersRound className='mr-2' />
+                輸入人數
+              </h3>
               <Input
                 type="number"
                 value={numberOfPeople}
                 onChange={(e) => setNumberOfPeople(Math.max(1, parseInt(e.target.value) || 1))}
                 min={1}
                 placeholder="輸入人數"
-                className="w-full rounded-lg border border-gray-300"
+                className="w-full rounded-lg border border-black"
               />
             </div>
 
+            {/* 預約信息摘要表格 */}
+            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 shadow-sm">
+                <h3 className="text-base pb-2 mb-4 border-b flex items-center text-gray-700 sticky top-0 bg-gray-50 z-10">
+                  <ClipboardCheck className="mr-2" />
+                  預約信息確認
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center py-2 border-b border-gray-100">
+                    <Store className="w-5 h-5 text-blue-500 mr-3 flex-shrink-0" />
+                    <span className="text-gray-500 w-20 flex-shrink-0">餐廳</span>
+                    <span className="text-gray-700 font-medium truncate">{restaurant.name}</span>
+                  </div>
+                  
+                  <div className="flex items-center py-2 border-b border-gray-100">
+                    <CalendarCheck className="w-5 h-5 text-blue-500 mr-3 flex-shrink-0" />
+                    <span className="text-gray-500 w-20 flex-shrink-0">日期</span>
+                    <span className="text-gray-700 font-medium">
+                      {selectedDate ? format(selectedDate, 'yyyy年MM月dd日') : '尚未選擇'}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center py-2 border-b border-gray-100">
+                    <Clock className="w-5 h-5 text-blue-500 mr-3 flex-shrink-0" />
+                    <span className="text-gray-500 w-20 flex-shrink-0">時間</span>
+                    <span className="text-gray-700 font-medium">
+                      {selectedTime || '尚未選擇'}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center py-2 border-b border-gray-100">
+                    <Users className="w-5 h-5 text-blue-500 mr-3 flex-shrink-0" />
+                    <span className="text-gray-500 w-20 flex-shrink-0">人數</span>
+                    <span className="text-gray-700 font-medium">{numberOfPeople} 人</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+            {/* 按鈕固定在底部 */}
+          <div className="p-4 border-t mt-4 bg-white">
             <Button
-              className="w-full bg-blue-600 hover:bg-blue-700"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2"
               onClick={() => handleBooking(restaurant.id, selectedDate, selectedTime, numberOfPeople)}
               disabled={!selectedDate || !selectedTime || isLoading}
             >
-              確認預約
+              <CalendarPlus className="w-5 h-5" />
+              <span>確認預約</span>
             </Button>
           </div>
         </DialogContent>

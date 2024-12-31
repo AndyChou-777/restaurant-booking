@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useNavigate } from 'react-router-dom'
-import Alert from '@/components/Alert'
+import { Building2, Users, Mails, LockKeyhole, ShieldCheck, LogIn } from 'lucide-react';
 
 function LoginPage( { handleLogin } ) {
   const navigate = useNavigate();
@@ -45,9 +45,11 @@ function LoginPage( { handleLogin } ) {
         <Tabs defaultValue="personal" className="w-full max-w-md bg-white p-8 rounded-lg shadow-xl">
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="personal" className="text-lg font-semibold text-gray-800 focus:ring-0 hover:text-blue-600">
+            <Users className='mr-1 mb-1'/>
               一般用戶
             </TabsTrigger>
             <TabsTrigger value="enterprise" className="text-lg font-semibold text-gray-800 focus:ring-0 hover:text-blue-600">
+              <Building2 className='mr-1 mb-1'/>
               企業用戶
             </TabsTrigger>
           </TabsList>
@@ -55,10 +57,15 @@ function LoginPage( { handleLogin } ) {
           {/* 一般用戶登入 */}
           <TabsContent value="personal">
             <form onSubmit={handleSubmitPersonal} className="space-y-4">
-              <h2 className="text-2xl font-bold text-center text-gray-800">一般用戶登入</h2>
+              <h2 className="text-2xl font-bold text-center text-gray-800">
+                一般用戶登入
+              </h2>
               <div className="space-y-3">
                 <div>
-                  <Label htmlFor="personal-email">電子郵件</Label>
+                  <Label className='flex text-black font-bold' htmlFor="personal-email">
+                    <Mails />
+                    <p className='text-base ml-2'>電子郵件</p>
+                  </Label>
                   <Input 
                     id="personal-email" 
                     type="email" 
@@ -70,7 +77,10 @@ function LoginPage( { handleLogin } ) {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="personal-password">密碼</Label>
+                  <Label className='flex text-black font-bold' htmlFor="personal-password">
+                    <LockKeyhole />
+                    <p className='text-base ml-2'>密碼</p>
+                  </Label>
                   <Input 
                     id="personal-password" 
                     type="password" 
@@ -87,11 +97,12 @@ function LoginPage( { handleLogin } ) {
                   style={{ height: 'auto', borderRadius: '8px' }}
                 >
                   登入
+                  <LogIn />
                 </Button>
                 {error && <p className="text-red-500 text-sm text-center">{error}</p>}
                 <div className="text-center text-sm text-gray-600">
                   還沒有帳號？ 
-                  <a href="#" className="text-blue-600 hover:underline">立即註冊</a>
+                  <a href="/register/user" className="text-blue-600 hover:underline">立即註冊</a>
                 </div>
               </div>
             </form>
@@ -103,7 +114,10 @@ function LoginPage( { handleLogin } ) {
               <h2 className="text-2xl font-bold text-center text-gray-800">企業用戶登入</h2>
               <div className="space-y-3">
                 <div>
-                  <Label htmlFor="enterprise-account">企業帳號</Label>
+                  <Label className='flex text-black font-bold' htmlFor="enterprise-account">
+                    <Mails />
+                    <p className='text-base ml-2'>企業信箱</p>
+                  </Label>
                   <Input 
                     id="enterprise-account" 
                     type="text" 
@@ -115,7 +129,10 @@ function LoginPage( { handleLogin } ) {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="enterprise-password">密碼</Label>
+                  <Label className='flex text-black font-bold' htmlFor="enterprise-password">
+                    <LockKeyhole />
+                    <p className='text-base ml-2'>密碼</p>
+                  </Label>
                   <Input 
                     id="enterprise-password" 
                     type="password" 
@@ -132,11 +149,12 @@ function LoginPage( { handleLogin } ) {
                   style={{ height: 'auto', borderRadius: '8px' }}
                 >
                   登入
+                  <LogIn />
                 </Button>
                 {error && <p className="text-red-500 text-sm text-center">{error}</p>}
                 <div className="text-center text-sm text-gray-600">
-                  忘記密碼？ 
-                  <a href="#" className="text-blue-600 hover:underline">重設密碼</a>
+                  還沒有帳號？ 
+                  <a href="/register/business" className="text-blue-600 hover:underline">立即註冊</a>
                 </div>
               </div>
             </form>

@@ -4,8 +4,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { registerGeneralUser } from '@/service/authService'
 import { useNavigate } from 'react-router-dom'
+import { UsersRound, Mails, LockKeyhole, ShieldCheck } from 'lucide-react';
 
-function UserRegisterPage() {
+function UserRegisterPage( {showTemporaryAlert} ) {
   const [isIntroPhase, setIsIntroPhase] = useState(true)
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -17,7 +18,7 @@ function UserRegisterPage() {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      alert("密碼確認不符，請重新輸入");
+      showTemporaryAlert('密碼錯誤', '密碼確認不符，請重新輸入!', 'error');
       return;
     }
 
@@ -25,14 +26,13 @@ function UserRegisterPage() {
       const data = await registerGeneralUser(name, email, password);
 
       if (data.message === "一般用戶註冊成功!") {
-        alert("一般用戶註冊成功!");
-        navigate('/');
+        showTemporaryAlert('註冊成功', '用戶註冊成功，請登入後進行操作!', 'check', '/login');
       } else {
-        alert("一般用戶註冊失敗!");
+        showTemporaryAlert('註冊失敗', '用戶註冊失敗，請重新註冊或稍後再試!', 'error');
       }
     } catch (error) {
       console.error("註冊錯誤:", error);
-      alert("伺服器錯誤，請稍後再試。");
+      showTemporaryAlert('伺服器錯誤', '伺服器或網路連接錯誤，請稍後再試!', 'error');
     }
   };
 
@@ -53,7 +53,7 @@ function UserRegisterPage() {
                 />
                 <div className="text-center">
                   <h3 className="text-xl font-semibold text-center">專屬推薦</h3>
-                  <p>提升您的餐廳知名度和客源補字補字補字補</p>
+                  <p>瀏覽平台上各式餐廳，獲得專屬個性化推薦</p>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
@@ -64,7 +64,7 @@ function UserRegisterPage() {
                 />
                 <div className="text-center">
                   <h3 className="text-xl font-semibold text-center">會員優惠</h3>
-                  <p>提升您的餐廳知名度和客源補字補字補字補</p>
+                  <p>預約心宜的餐廳，及時獲取餐廳的最新優惠</p>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
@@ -75,7 +75,7 @@ function UserRegisterPage() {
                 />
                 <div className="text-center">
                   <h3 className="text-xl font-semibold">輕鬆訂位</h3>
-                  <p>提升您的餐廳知名度和客源補字補字補字補</p>
+                  <p>一鍵搜索平台熱門餐廳，輕鬆預約適合時段</p>
                 </div>
               </div>
             </div>
@@ -92,7 +92,10 @@ function UserRegisterPage() {
             <h2 className="text-2xl font-extrabold text-center text-gray-800">一般用戶註冊</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label>姓名</Label>
+                <Label className='flex text-black font-bold'>
+                  <UsersRound />
+                  <p className='text-lg ml-2'>用戶姓名</p>
+                  </Label>
                 <Input
                   type="text"
                   value={name}
@@ -103,7 +106,10 @@ function UserRegisterPage() {
                 />
               </div>
               <div>
-                <Label>電子郵件</Label>
+                <Label className='flex text-black font-bold'>
+                  <Mails />
+                  <p className='text-lg ml-2'>電子郵件</p>
+                </Label>
                 <Input
                   type="email"
                   value={email}
@@ -114,7 +120,10 @@ function UserRegisterPage() {
                 />
               </div>
               <div>
-                <Label>密碼</Label>
+                <Label className='flex text-black font-bold'>
+                  <LockKeyhole />
+                  <p className='text-lg ml-2'>帳戶密碼</p>
+                </Label>
                 <Input
                   type="password"
                   value={password}
@@ -126,7 +135,10 @@ function UserRegisterPage() {
                 />
               </div>
               <div>
-                <Label>確認密碼</Label>
+                <Label className='flex text-black font-bold'>
+                  <ShieldCheck />
+                  <p className='text-lg ml-2'>確認密碼</p>
+                </Label>
                 <Input
                   type="password"
                   value={confirmPassword}

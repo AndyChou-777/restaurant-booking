@@ -132,7 +132,7 @@ function App() {
           <Route path="/register/user" element={<UserRegisterPage showTemporaryAlert={showTemporaryAlert} />}  />
           <Route path="/register/business" element={<BusinessRegisterPage showTemporaryAlert={showTemporaryAlert} />} />
           <Route path="/user/dashboard" element={<UserDashboard showTemporaryAlert={showTemporaryAlert} />} />
-          <Route path="/business/dashboard" element={<BusinessDashboard />} />
+          <Route path="/business/dashboard" element={<BusinessDashboard showTemporaryAlert={showTemporaryAlert} />} />
           <Route path="/restaurant-reservation" element={<RestaurantBookingApp searchParams={searchParams} setSearchParams={setSearchParams} showTemporaryAlert={showTemporaryAlert} />} />
         </Routes>
         

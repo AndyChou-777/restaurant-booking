@@ -23,6 +23,17 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -39,13 +50,13 @@ function UserDashboard( { showTemporaryAlert } ) {
   const [activeTab, setActiveTab] = useState("orders")
   const navigate = useNavigate();
   const [selectedReservation, setSelectedReservation] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
 
     const fetchUserReservations = async () => {
       try {
-        const apiResponse = await getUserReservations()
-        console.log(apiResponse);
+        const apiResponse = await getUserReservations();
         setUserData(apiResponse);
       } catch (error) {
         console.error("預約資料讀取錯誤:", error);
@@ -200,7 +211,7 @@ function UserDashboard( { showTemporaryAlert } ) {
                       </span>
                       </div>
                       <div className="col-span-1 flex justify-center space-x-2 mr-4">
-                      <Dialog>
+                      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen} >
                       <DialogTrigger asChild>
                         <Button 
                           variant="outline"
@@ -218,21 +229,31 @@ function UserDashboard( { showTemporaryAlert } ) {
                         <EditBookingForm 
                           booking={reservation}
                           showTemporaryAlert={showTemporaryAlert}
+                          setIsDialogOpen={setIsDialogOpen}
                         />
                       </DialogContent>
                     </Dialog>
-                    <Button 
-                      variant="outline"
-                      size="sm"
-                      className="text-white hover:text-white bg-red-500 hover:bg-red-600 rounded-[8px]"
-                      onClick={() => {
-                        if (window.confirm('確定要取消此預約嗎？')) {
-                          handleCancel(reservation.name, reservation.id)
-                        }
-                      }}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" /> 刪除
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger
+                        variant="destructive"
+                        size="sm"
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 rounded-[8px] text-white hover:text-white bg-red-500 hover:bg-red-600"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" /> 刪除
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className="bg-white">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>取消預約</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            您確定要刪除該筆預約資料嗎?
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                        <AlertDialogAction className="bg-blue-500 text-white font-bold shadow-md hover:bg-blue-600 rounded-[8px]" onClick={()=> handleCancel(reservation.name, reservation.id)}>繼續</AlertDialogAction>
+                          <AlertDialogAction className="bg-red-500 text-white font-bold shadow-md hover:bg-red-600 rounded-[8px]">返回</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
                   ))}
@@ -246,7 +267,7 @@ function UserDashboard( { showTemporaryAlert } ) {
     }
   }
 
-  if (!userData) return <div>載入中...</div>
+  if (!userData) return <div>使用者未登入...</div>
 
   return (
     <div className="flex h-screen bg-gray-900">
@@ -281,7 +302,7 @@ function UserDashboard( { showTemporaryAlert } ) {
   )
 }
 
-const EditBookingForm = ({ booking, showTemporaryAlert }) => {
+const EditBookingForm = ({ booking, showTemporaryAlert, setIsDialogOpen }) => {
   const [selectedDate, setSelectedDate] = useState(booking?.date ? new Date(booking.date) : null);
   const [selectedTime, setSelectedTime] = useState(booking?.time || '');
   const [availableDateRanges, setAvailableDateRanges] = useState([]);
@@ -442,9 +463,8 @@ const EditBookingForm = ({ booking, showTemporaryAlert }) => {
     });
   };
 
-  const handleBooking = async (e) => {
-    e.preventDefault();
-    
+  const handleBooking = async () => {
+  
     if (!selectedDate || !selectedTime) return;
     
     setIsLoading(true);
@@ -463,19 +483,17 @@ const EditBookingForm = ({ booking, showTemporaryAlert }) => {
       const apiResponse = await updateReservation(booking.id, reservationData);
       
       if (apiResponse.message === '預約更新成功!') {
-        const closeButton = document.querySelector('[data-dialog-close]');
-        if (closeButton) {
-          closeButton.click();
-        }
+
         showTemporaryAlert('更新成功', '預約資訊已成功更新!', 'check');
+        setIsDialogOpen(false);
 
         setTimeout(() => {
           window.location.reload();
-        }, 10000);
+        }, 3000);
       }
     } catch (error) {
       console.error('預約失敗:', error);
-      alert('預約更新失敗，請稍後再試。');
+      showTemporaryAlert('更新失敗', '預約更新失敗，請稍後再試!', 'error');
     } finally {
       setIsLoading(false);
     }

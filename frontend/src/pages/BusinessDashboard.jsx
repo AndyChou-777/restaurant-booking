@@ -53,7 +53,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { getBusinessReservations, cancelReservation, finishReservation } from "@/service/reservationService"
 
-function BusinessDashboard() {
+function BusinessDashboard( {showTemporaryAlert} ) {
   const [activeTab, setActiveTab] = useState("restaurants");
   const [restaurants, setRestaurants] = useState([]);
   const [userData, setUserData] = useState(null)
@@ -79,9 +79,6 @@ function BusinessDashboard() {
   });
 
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertTitle, setAlertTitle] = useState(null);
-  const [alertDescription, setAlertDescription] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -150,7 +147,7 @@ function BusinessDashboard() {
           }
         } catch (error) {
           console.error("無法加載餐廳資料:", error);
-          showTemporaryAlert('錯誤', '無法加載餐廳資料');
+          showTemporaryAlert('資料錯誤', '暫時無法加載餐廳資料，請稍後再試!', 'error');
         }
       };
     
@@ -159,27 +156,16 @@ function BusinessDashboard() {
       }
     }, [activeTab]);
 
-  const showTemporaryAlert = (title, description) => {
-    
-    setAlertTitle(title);
-    setAlertDescription(description);
-    setShowAlert(true);
-
-    setTimeout(() => {
-      setShowAlert(false);
-    }, 3000); 
-  };
-
   const handleDeleteRestaurant = async (id) => {
     try {
       const apiResponse = await deleteRestaurant(id);
       if(apiResponse.message === '餐廳刪除成功') {
         setRestaurants(prev => prev.filter(restaurant => restaurant.id !== id));
-        showTemporaryAlert('刪除成功', '餐廳資料已成功刪除')
+        showTemporaryAlert('操作成功', '餐廳資料已成功刪除!', 'check')
       }
     } catch (error) {
       console.error('Error details:', error);
-      showTemporaryAlert('錯誤', error.message);
+      showTemporaryAlert('操作失敗', '餐廳刪除失敗，請稍後再試!', 'error');
     }
   };
 
@@ -202,11 +188,11 @@ function BusinessDashboard() {
           setSelectedRestaurant(null);
   
           // 顯示成功提示
-          showTemporaryAlert('修改成功!', '餐廳資料已成功更新');
+          showTemporaryAlert('修改成功', '餐廳資料已成功更新!', 'check');
         }
       } catch (error) {
         console.error('更新餐廳時出現錯誤:', error);
-        showTemporaryAlert('錯誤', '無法更新餐廳，請稍後再試');
+        showTemporaryAlert('修改失敗', '目前無法更新餐廳，請稍後再試!', 'error');
       }
     }
   };  
@@ -241,7 +227,7 @@ function BusinessDashboard() {
     try {
         const apiResponse = await createRestaurant(newRestaurant);
         if (apiResponse.message === '餐廳建立成功') {
-          showTemporaryAlert('成功', '餐廳創建成功！');
+          showTemporaryAlert('建立成功', '餐廳資料已成功建立！', 'check');
 
            // 清空表單，將各個欄位重設為初始狀態
           setNewRestaurant({
@@ -259,7 +245,7 @@ function BusinessDashboard() {
 
     } catch (error) {
         console.error('Error details:', error); // 添加詳細錯誤日誌
-        showTemporaryAlert('錯誤', error.message);
+        showTemporaryAlert('建立失敗', '餐廳未能成功建立，請稍後再試！', 'error');
     }
 };
 
@@ -732,7 +718,7 @@ function BusinessDashboard() {
                   />
                 </div>
                 <Button className="bg-blue-500 text-white font-bold shadow-md hover:bg-blue-600 rounded-[8px]"
-                        onClick = { () => showTemporaryAlert('資料變更成功!', '餐廳基本資料已變更')}
+                        onClick = { () => showTemporaryAlert('更新成功', '餐廳資料已成功變更!', 'check')}
                 >
                   儲存變更
                 </Button>
@@ -950,18 +936,6 @@ function BusinessDashboard() {
 
   return (
     <div className="flex h-screen">
-
-      {/* Alert 控制區塊 */}
-
-      {showAlert && (
-      <Alert className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white text-black border border-black p-4 shadow-lg z-50 w-[500px] rounded-[8px]">
-      <AlertCircle className="h-4 w-4" />
-      <AlertTitle className='font-bold'>{alertTitle}</AlertTitle>
-      <AlertDescription>
-        {alertDescription}
-      </AlertDescription>
-      </Alert>
-      )}
 
       {/* 側邊欄 */}
       <div className="w-64 border-r bg-gray-800 p-4">

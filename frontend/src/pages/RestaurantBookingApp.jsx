@@ -228,7 +228,7 @@ function RestaurantBookingApp({ searchParams, setSearchParams, showTemporaryAler
                   </h4>
                   <div className="flex flex-wrap gap-2">
                     {restaurant.availableTimes && restaurant.availableTimes.length > 0 ? (
-                      restaurant.availableTimes.slice(0, 12).map(time => (
+                      restaurant.availableTimes.slice(0, 14).map(time => (
                         <span key={time} className="bg-blue-400 text-white text-xs px-2 py-1 rounded-full">
                           {time}
                         </span>

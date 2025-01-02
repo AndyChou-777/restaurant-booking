@@ -88,17 +88,14 @@ function BusinessDashboard( {showTemporaryAlert} ) {
           const apiResponse = await checkSession(); // 使用判斷是否已登入服務方法
           if (apiResponse.message === "登入成功") {
             if (apiResponse.data.role === "GENERAL_USER") {
-              alert("身分別錯誤，請改用一般帳號登入!");
-              navigate('/login');
+              showTemporaryAlert('登入錯誤', '身分別錯誤，請改用一般帳號登入!', 'error', '/login');
             }
           } else {
-            alert("用戶未登入，請先進行登入!");
-            navigate('/login');
+            showTemporaryAlert('登入錯誤', '用戶未登入，請先進行登入!', 'error', '/login');
           }
         } catch (error) {
           console.error("無法檢查登入狀態:", error);
-          alert("使用者未登入，請先登入以進行操作!");
-          navigate('/');
+          showTemporaryAlert('登入錯誤', '使用者未登入，請先登入以進行操作!', 'error', '/login');
         }
       };
   
@@ -202,8 +199,10 @@ function BusinessDashboard( {showTemporaryAlert} ) {
         const apiResponse = await cancelReservation(id);
   
         if (apiResponse.message === '預約取消成功!') {
-          alert(`${name} 預約取消成功!`)
-          window.location.reload()
+          showTemporaryAlert('操作成功', '該筆預約已成功進行刪除!', 'check');
+          setTimeout(() => {
+            window.location.reload();
+          }, 3000);
         }
       } catch (error) {
         console.error(error.message)
@@ -215,8 +214,10 @@ function BusinessDashboard( {showTemporaryAlert} ) {
       const apiResponse = await finishReservation(id);
 
       if (apiResponse.message === '預約成功報到') {
-        alert(`#${id} 預約成功報到!`)
-        window.location.reload()
+        showTemporaryAlert('操作成功', `編號 #${id} 預約成功報到!`, 'check');
+          setTimeout(() => {
+            window.location.reload();
+          }, 3000);
       }
     } catch (error) {
       console.error(error.message)
@@ -323,7 +324,7 @@ function BusinessDashboard( {showTemporaryAlert} ) {
                         variant="outline" 
                         size="sm" 
                         onClick={() => handleEditRestaurant(restaurant)}
-                        className="rounded-[8px]"
+                        className="text-white hover:text-white bg-blue-500 hover:bg-blue-600 rounded-[8px]"
                       >
                         <Edit className="mr-2 h-4 w-4" /> 編輯
                       </Button>
@@ -331,7 +332,7 @@ function BusinessDashboard( {showTemporaryAlert} ) {
                       <AlertDialogTrigger
                         variant="destructive"
                         size="sm"
-                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 rounded-[8px]"
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 rounded-[8px] text-white hover:text-white bg-red-500 hover:bg-red-600"
                       >
                         <Trash2 className="mr-2 h-4 w-4" /> 刪除
                       </AlertDialogTrigger>
@@ -655,30 +656,48 @@ function BusinessDashboard( {showTemporaryAlert} ) {
                       </span>
                       </div>
                       <div className="col-span-1 flex justify-center space-x-2 mr-4">
-                      <Button 
-                      variant="outline"
-                      size="sm"
-                      className="text-white hover:text-white bg-blue-500 hover:bg-blue-600 rounded-[8px]"
-                      onClick={() => {
-                        if (window.confirm('確定要完成此筆預約嗎？')) {
-                          handleFinish(reservation.id)
-                        }
-                      }}
-                    >
-                      <CircleCheckBig className="mr-2 h-4 w-4" /> 完成
-                    </Button>
-                    <Button 
-                      variant="outline"
-                      size="sm"
-                      className="text-white hover:text-white bg-red-500 hover:bg-red-600 rounded-[8px]"
-                      onClick={() => {
-                        if (window.confirm('確定要刪除此預約嗎？')) {
-                          handleCancel(reservation.name, reservation.id)
-                        }
-                      }}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" /> 刪除
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger
+                        variant="destructive"
+                        size="sm"
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 rounded-[8px] text-white hover:text-white bg-blue-500 hover:bg-blue-600"
+                      >
+                        <CircleCheckBig className="mr-2 h-4 w-4" /> 完成
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className="bg-white">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>完成預約</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            此操作會將該筆預約轉為完成，確定要繼續嗎?
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                        <AlertDialogAction className="bg-blue-500 text-white font-bold shadow-md hover:bg-blue-600 rounded-[8px]" onClick={()=> handleFinish(reservation.id)}>確定</AlertDialogAction>
+                          <AlertDialogAction className="bg-red-500 text-white font-bold shadow-md hover:bg-red-600 rounded-[8px]">取消</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                    <AlertDialog>
+                      <AlertDialogTrigger
+                        variant="destructive"
+                        size="sm"
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 rounded-[8px] text-white hover:text-white bg-red-500 hover:bg-red-600"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" /> 刪除
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className="bg-white">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>刪除預約</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            此操作將永久刪除該筆預約資料，確定要繼續嗎?
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                        <AlertDialogAction className="bg-blue-500 text-white font-bold shadow-md hover:bg-blue-600 rounded-[8px]" onClick={()=> handleCancel(reservation.name, reservation.id)}>確定</AlertDialogAction>
+                          <AlertDialogAction className="bg-red-500 text-white font-bold shadow-md hover:bg-red-600 rounded-[8px]">取消</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
                   ))}
@@ -851,7 +870,7 @@ function BusinessDashboard( {showTemporaryAlert} ) {
                   setSelectedRestaurant(prev => ({ ...prev, timeSlots: [...prev.timeSlots, newSlot] }));
                 }}
               >
-                新增時間
+                <CirclePlus /> 新增時間
               </Button>
               </div>
             </div>
@@ -925,7 +944,7 @@ function BusinessDashboard( {showTemporaryAlert} ) {
                 }} 
                 className="bg-blue-500 text-white font-bold hover:bg-blue-600 rounded-[8px] mt-2 mb-2"
               >
-                儲存變更
+                <SquarePen className="mr-2"/> 儲存變更
               </Button>
             </div>
           </div>

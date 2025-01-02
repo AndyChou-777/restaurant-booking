@@ -201,7 +201,7 @@ function UserDashboard( { showTemporaryAlert } ) {
                       <span
                         className={`px-3 py-1 rounded-full text-sm font-medium
                           ${reservation.status === 'CONFIRMED' ? 'bg-blue-500 text-white' : 
-                            reservation.status === 'COMPLETED' ? 'bg-blue-500 text-white' : 
+                            reservation.status === 'COMPLETED' ? 'bg-green-600 text-white' : 
                             reservation.status === 'CANCELLED' ? 'bg-red-500 text-white' : 
                             'bg-gray-100 text-gray-800'}`}
                       >

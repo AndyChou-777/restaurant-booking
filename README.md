@@ -1,2 +1,16 @@
-# restaurant-booking
-This is a project for restaurant-booking.
+# OMOTENASHI | 餐廳預約平台
+## 專案背景
+希望打造一個能整合市面上餐廳的餐廳預約網站，使商業用戶能夠零成本快速上架旗下餐廳，觸及更多目標客群。同時，讓一般用戶能透過直觀的瀏覽與搜尋功能，輕鬆找到心儀的餐廳，並快速完成預約，提升整體用餐體驗。
+## Frontend
+* 使用 JavaScript 與 React 建構網站核心架構，透過串接 Java API 實現流暢的頁面切換與數據渲染 
+* 利用 Tailwind CSS 和 Shadcn UI 設計精美的用戶介面，提升開發效率並確保整體的視覺效果
+## Backend
+* 基於 RESTful API 風格，運用 Spring Boot 框架構建完整後端系統
+* 使用 @Valid 進行數據校驗，確保用戶提交的資料符合系統邏輯
+* 利用 AOP 切面執行用戶 Session 驗證，強化系統安全性，並採用 @ControllerAdvice 實現統一的錯誤處理，提升系統的可維護性，並減少程式碼中不相關的驗證和錯誤處理
+* 採用含鹽雜湊技術保護用戶密碼，預防惡意破解
+## Database
+* 使用 MySQL 資料庫進行資料存儲與查詢
+* 利用 JPA 映射資料庫，實現自定義數據查找，並方便統一管理資料庫語法
+
+### 更詳細的專案介紹及網站功能，歡迎參考目錄的簡報及程式碼！
